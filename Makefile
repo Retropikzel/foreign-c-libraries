@@ -38,8 +38,8 @@ test: ${TMPDIR}
 	cd ${TMPDIR} && ./test
 
 test-docker: ${TMPDIR}
-	docker build --build-arg IMAGE=${DOCKERIMG} --build-arg SCHEME=${SCHEME} --tag=foreign-c-test-${SCHEME} -f Dockerfile.test . 2> ${TMPDIR}/docker.log || cat ${TMPDIR}/docker.log
-	docker run -it -v "${PWD}:/workdir" -w /workdir -t foreign-c-test-${SCHEME} \
+	docker build --build-arg IMAGE=${DOCKERIMG} --build-arg SCHEME=${SCHEME} --tag=foreign-c-library-test-${SCHEME} -f Dockerfile.test . 2> ${TMPDIR}/docker.log || cat ${TMPDIR}/docker.log
+	docker run -it -v "${PWD}:/workdir" -w /workdir -t foreign-c-library-test-${SCHEME} \
 		sh -c "make SCHEME=${SCHEME} SNOW_CHIBI_ARGS=--always-yes build install test; chmod -R 755 ${TMPDIR}"
 
 clean:
