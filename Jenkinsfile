@@ -2,8 +2,8 @@ pipeline {
     agent {
         dockerfile {
             filename 'Dockerfile.jenkins'
-            image 'debian'
             args '--user=root --privileged -v /var/run/docker.sock:/var/run/docker.sock'
+            reuseNode true
         }
     }
 
