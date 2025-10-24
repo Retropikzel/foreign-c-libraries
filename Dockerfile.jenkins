@@ -7,6 +7,8 @@ WORKDIR /chibi-scheme
 RUN make
 RUN make install
 WORKDIR /compile-r7rs
-RUN make
+RUN snow-chibi install --always-yes "(foreign c)"
+RUN snow-chibi install --always-yes "(srfi 170)"
+RUN make build-chibi
 RUN make install
 
