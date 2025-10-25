@@ -3,6 +3,7 @@ pipeline {
         dockerfile {
             filename 'Dockerfile.jenkins'
             args '--user=root --privileged -v /var/run/docker.sock:/var/run/docker.sock'
+            reuseNode true
         }
     }
 
