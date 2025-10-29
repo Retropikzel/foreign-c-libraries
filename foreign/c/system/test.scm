@@ -2,8 +2,7 @@
         (scheme write)
         (scheme file)
         (scheme process-context)
-        (foreign c)
-        (retropikzel system)
+        (foreign c system)
         (srfi 64))
 
 (test-begin "foreign-c-system")
@@ -20,6 +19,6 @@
 
 (define exit-code2 (system "no-such-command"))
 
-(test-assert (not (= exit-code1 0)))
+(test-assert (> exit-code2 0))
 
 (test-end "foreign-c-system")

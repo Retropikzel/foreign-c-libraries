@@ -1,14 +1,16 @@
 .SILENT: build install test test-docker clean ${TMPDIR}
-LIBRARY=system
-README=${LIBRARY}/README.html
-DESCRIPTION=$(shell head -n1 ${LIBRARY}/README.md)
-VERSION=$(shell cat ${LIBRARY}/VERSION)
-AUTHOR=$(shell cat ${LIBRARY}/AUTHOR | tr '[:upper:]' '[:lower:]')
-LIBRARY_FILE=${LIBRARY}/${AUTHOR}/${LIBRARY}.sld
-PKG=${AUTHOR}-${LIBRARY}-${VERSION}.tgz
 SCHEME=chibi
+LIBRARY=system
+AUTHOR=Retropikzel
+
+LIBRARY_FILE=foreign/c/${LIBRARY}.sld
+VERSION=$(shell cat foreign/c/${LIBRARY}/VERSION)
+DESCRIPTION=$(shell head -n1 foreign/c/${LIBRARY}/README.md)
+README=foreign/c/${LIBRARY}/README.html
+TESTFILE=foreign/c/${LIBRARY}/test.scm
+
+PKG=foreign-c-${LIBRARY}-${VERSION}.tgz
 TMPDIR=tmp/${SCHEME}
-TESTFILE=${LIBRARY}/test.scm
 
 DOCKERIMG=${SCHEME}:head
 ifeq "${SCHEME}" "chicken"
@@ -17,8 +19,8 @@ endif
 
 all: build
 
-build: ${LIBRARY}/LICENSE ${LIBRARY}/VERSION ${LIBRARY}/AUTHOR
-	echo "<pre>$$(cat ${LIBRARY}/README.md)</pre>" > ${README}
+build: foreign/c/${LIBRARY}/LICENSE foreign/c/${LIBRARY}/VERSION
+	echo "<pre>$$(cat foreign/c/${LIBRARY}/README.md)</pre>" > ${README}
 	snow-chibi package --version=${VERSION} --authors=${AUTHOR} --doc=${README} --description="${DESCRIPTION}" ${LIBRARY_FILE}
 
 install:
@@ -30,7 +32,9 @@ uninstall:
 ${TMPDIR}:
 	@mkdir -p ${TMPDIR}
 	@cp ${TESTFILE} ${TMPDIR}/
-	@cp -r ${LIBRARY} ${TMPDIR}/
+	@mkdir -p ${TMPDIR}/foreign/c
+	@cp -r foreign/c/${LIBRARY} ${TMPDIR}/foreign/c/
+	@cp -r foreign/c/${LIBRARY}.s* ${TMPDIR}/foreign/c/
 
 test: ${TMPDIR}
 	echo "Hello"

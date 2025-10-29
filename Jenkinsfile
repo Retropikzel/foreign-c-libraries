@@ -13,7 +13,7 @@ pipeline {
     }
 
     parameters {
-        string(name: 'LIBRARIES', defaultValue: 'system', description: '')
+        string(name: 'LIBRARIES', defaultValue: 'system shell', description: '')
     }
 
     stages {
@@ -29,6 +29,7 @@ pipeline {
                                     stage("${SCHEME}") {
                                         catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                                             sh "make SCHEME=${SCHEME} clean test-docker"
+                                            archiveArtifacts artifacts: 'tmp/*/*.log', fingerprint: true
                                         }
                                     }
                                 }]

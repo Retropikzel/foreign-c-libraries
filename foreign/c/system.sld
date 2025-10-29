@@ -1,5 +1,5 @@
 (define-library
-  (retropikzel system)
+  (foreign c system)
   (import (scheme base)
           (scheme write)
           (foreign c))
