@@ -10,7 +10,7 @@ README=foreign/c/${LIBRARY}/README.html
 TESTFILE=foreign/c/${LIBRARY}/test.scm
 
 PKG=foreign-c-${LIBRARY}-${VERSION}.tgz
-TMPDIR=tmp/${SCHEME}
+TMPDIR=tmp/${SCHEME}-${LIBRARY}
 
 DOCKERIMG=${SCHEME}:head
 ifeq "${SCHEME}" "chicken"
