@@ -21,7 +21,7 @@ pipeline {
         stage('Tests') {
             steps {
                 script {
-                    def implementations = sh(script: 'chibi chicken foment gauche guile kawa mosh racket sagittarius stklos ypsilon', returnStdout: true).split()
+                    def implementations = 'chibi chicken foment gauche guile kawa mosh racket sagittarius stklos ypsilon'.split()
 
                     params.LIBRARIES.split().each { LIBRARY ->
                         stage("${LIBRARY}") {
