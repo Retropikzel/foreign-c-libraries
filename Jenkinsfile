@@ -42,7 +42,7 @@ pipeline {
     }
     post {
         always {
-            archiveArtifacts artifacts: "tmp/*/*.log", excludes: "tmp/*/docker.log", allowEmptyArchive: true
+            archiveArtifacts artifacts: "tmp/*/*/*.log", excludes: "tmp/*/*/docker.log", allowEmptyArchive: true
         }
     }
 }
