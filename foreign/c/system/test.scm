@@ -17,7 +17,7 @@
 
 (test-assert (string=? text "Hello"))
 
-(define exit-code2 (system "no-such-command"))
+(define exit-code2 (system "no-such-command 2> /dev/null"))
 
 (test-assert (> exit-code2 0))
 
