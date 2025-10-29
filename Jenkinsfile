@@ -30,7 +30,6 @@ pipeline {
                                     stage("${SCHEME}") {
                                         catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                                             sh "timeout 6000 make SCHEME=${SCHEME} clean test-docker"
-                                            archiveArtifacts artifacts: 'tmp/*/*.log', fingerprint: true
                                         }
                                     }
                                 }]
@@ -38,6 +37,12 @@ pipeline {
                         }
                     }
                 }
+            }
+        }
+
+        post {
+            always {
+                archiveArtifacts artifacts: '*.log', fingerprint: true
             }
         }
     }

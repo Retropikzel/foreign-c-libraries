@@ -40,6 +40,7 @@ test: ${TMPDIR}
 	echo "Hello"
 	cd ${TMPDIR} && COMPILE_R7RS=${SCHEME} compile-r7rs -I . -o test test.scm
 	cd ${TMPDIR} && ./test
+	cp ${TMPDIR}/foreign-c-${LIBRARY}.log ${SCHEME}-foreign-c-${LIBRARY}.log
 
 test-docker: ${TMPDIR}
 	docker build --build-arg IMAGE=${DOCKERIMG} --build-arg SCHEME=${SCHEME} --tag=foreign-c-library-test-${SCHEME} -f Dockerfile.test . 2> ${TMPDIR}/docker.log || cat ${TMPDIR}/docker.log
