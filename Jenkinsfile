@@ -42,7 +42,7 @@ pipeline {
     }
     post {
         always {
-            archiveArtifacts artifacts: '*.log', fingerprint: true
+            archiveArtifacts artifacts: "*.log"
         }
     }
 }
