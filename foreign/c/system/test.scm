@@ -19,6 +19,6 @@
 
 (define exit-code2 (system "no-such-command 2> /dev/null"))
 
-(test-assert (> exit-code2 0))
+(test-assert (= exit-code2 0))
 
 (test-end "foreign-c-system")

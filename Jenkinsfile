@@ -30,6 +30,7 @@ pipeline {
                                     stage("${SCHEME}") {
                                         catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                                             sh "timeout 6000 make SCHEME=${SCHEME} clean test-docker"
+                                            sh "grep '# of failures' tmp/${LIBRARY}/${SCHEME}/*.log && exit 1"
                                         }
                                     }
                                 }]

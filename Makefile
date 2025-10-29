@@ -1,3 +1,4 @@
+.PHONY: ${TMPDIR}
 .SILENT: build install test test-docker clean ${TMPDIR}
 SCHEME=chibi
 LIBRARY=system
