@@ -29,7 +29,7 @@ pipeline {
                                 [(SCHEME): {
                                     stage("${SCHEME}") {
                                         catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                                            sh "make SCHEME=${SCHEME} clean test-docker"
+                                            sh "timeout 6000 make SCHEME=${SCHEME} clean test-docker"
                                             archiveArtifacts artifacts: 'tmp/*/*.log', fingerprint: true
                                         }
                                     }
