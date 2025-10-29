@@ -42,7 +42,7 @@ pipeline {
     }
     post {
         always {
-            archiveArtifacts artifacts: "*.log", allowEmptyArchive: true
+            archiveArtifacts artifacts: "tmp/*/*.log", allowEmptyArchive: true
         }
     }
 }
