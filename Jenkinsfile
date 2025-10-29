@@ -39,11 +39,10 @@ pipeline {
                 }
             }
         }
-
-        post {
-            always {
-                archiveArtifacts artifacts: '*.log', fingerprint: true
-            }
+    }
+    post {
+        always {
+            archiveArtifacts artifacts: '*.log', fingerprint: true
         }
     }
 }
