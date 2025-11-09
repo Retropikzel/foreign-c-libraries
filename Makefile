@@ -48,9 +48,4 @@ test-docker: ${TMPDIR}
 		sh -c "make SCHEME=${SCHEME} test; chmod -R 755 ${TMPDIR}"
 
 clean:
-	find . -name "README.html" -delete
-	rm -rf ${TMPDIR}
-	rm -rf *.tgz
-
-clean-all:
-	rm -rf tmp
+	git clean -X -f
