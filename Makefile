@@ -1,4 +1,3 @@
-.PHONY: ${TMPDIR}
 .SILENT: build install test test-docker clean ${TMPDIR}
 SCHEME=chibi
 LIBRARY=system
@@ -30,19 +29,19 @@ install:
 uninstall:
 	-snow-chibi remove --impls=${SCHEME} ${PKG}
 
-${TMPDIR}:
+tmpdir:
 	@mkdir -p ${TMPDIR}
 	@cp ${TESTFILE} ${TMPDIR}/
 	@mkdir -p ${TMPDIR}/foreign/c
 	@cp -r foreign/c/${LIBRARY} ${TMPDIR}/foreign/c/
 	@cp -r foreign/c/${LIBRARY}.s* ${TMPDIR}/foreign/c/
 
-test: ${TMPDIR}
+test: tmpdir
 	echo "Hello"
-	cd ${TMPDIR} && COMPILE_R7RS=${SCHEME} compile-r7rs -I . -o test test.scm
+	cd ${TMPDIR} && COMPILE_R7RS=${SCHEME} compile-scheme -I . -o test test.scm
 	cd ${TMPDIR} && printf "\n" | ./test
 
-test-docker: ${TMPDIR}
+test-docker: tmpdir
 	docker build --build-arg IMAGE=${DOCKERIMG} --build-arg SCHEME=${SCHEME} --tag=foreign-c-library-test-${SCHEME} -f Dockerfile.test . 2> ${TMPDIR}/docker.log || cat ${TMPDIR}/docker.log
 	docker run -v "${PWD}:/workdir" -w /workdir -t foreign-c-library-test-${SCHEME} \
 		sh -c "make SCHEME=${SCHEME} test; chmod -R 755 ${TMPDIR}"
