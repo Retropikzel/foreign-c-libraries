@@ -1,10 +1,9 @@
 pipeline {
     agent {
-        dockerfile {
+        docker {
             label 'docker-x86_64'
-            filename 'Dockerfile.jenkins'
+            image 'debian'
             args '--user=root --privileged -v /var/run/docker.sock:/var/run/docker.sock'
-            reuseNode true
         }
     }
 
@@ -14,37 +13,53 @@ pipeline {
     }
 
     parameters {
-        string(name: 'LIBRARIES', defaultValue: 'system shell', description: '')
+        string(name: 'R7RS_SCHEMES', defaultValue: 'chibi chicken gauche guile kawa mosh racket sagittarius stklos ypsilon', description: '')
+        string(name: 'R6RS_SCHEMES', defaultValue: 'chezscheme guile ikarus ironscheme mosh racket sagittarius ypsilon', description: '')
     }
 
     stages {
-        stage('Tests') {
+        stage('Init') {
             steps {
-                script {
-                    def implementations = 'chibi chicken foment gauche guile kawa mosh racket sagittarius stklos ypsilon'.split()
+                sh "apt-get update && apt-get install -y make docker.io git"
+            }
+        }
 
-                    params.LIBRARIES.split().each { LIBRARY ->
-                        stage("${LIBRARY}") {
-                            parallel implementations.collectEntries { SCHEME ->
-                                [(SCHEME): {
-                                    stage("${SCHEME}") {
-                                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                                            sh "timeout 6000 make SCHEME=${SCHEME} clean test-docker"
-                                            sh "grep '# of failures' tmp/${LIBRARY}/${SCHEME}/*.log && exit 1"
-                                        }
+        stage('Tests') {
+            parallel {
+                stage('R6RS x86_64 Debian') {
+                    steps {
+                        script {
+                            params.R6RS_SCHEMES.split().each { SCHEME ->
+                                def IMG="${SCHEME}:head"
+                                stage("${SCHEME}") {
+                                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                        sh "make SCHEME=${SCHEME} test-r6rs-docker"
                                     }
-                                }]
+                                }
                             }
                         }
                     }
                 }
+                stage('R7RS x86_64 Debian') {
+                    steps {
+                        script {
+                            params.R7RS_SCHEMES.split().each { SCHEME ->
+                                def IMG="${SCHEME}:head"
+                                if("${SCHEME}" == "chicken") {
+                                    IMG="${SCHEME}:5"
+                                }
+                                stage("${SCHEME}") {
+                                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                        sh "make SCHEME=${SCHEME} test-r7rs-docker"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
             }
         }
-    }
-    post {
-        always {
-            archiveArtifacts artifacts: "tmp/*/*/*.log", excludes: "tmp/*/*/docker.log", allowEmptyArchive: true
-            cleanWs()
-        }
+
     }
 }

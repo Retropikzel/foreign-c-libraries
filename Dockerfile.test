@@ -30,4 +30,7 @@ RUN make install
 WORKDIR /
 RUN snow-chibi install --impls=${SCHEME} --always-yes "(srfi 64)"
 RUN snow-chibi install --impls=${SCHEME} --always-yes "(foreign c)"
+WORKDIR /workdir
+COPY Makefile .
+COPY retropikzel retropikzel/
 

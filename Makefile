@@ -3,14 +3,14 @@ SCHEME=chibi
 LIBRARY=system
 AUTHOR=Retropikzel
 
-LIBRARY_FILE=foreign/c/${LIBRARY}.sld
-VERSION=$(shell cat foreign/c/${LIBRARY}/VERSION)
-DESCRIPTION=$(shell head -n1 foreign/c/${LIBRARY}/README.md)
-README=foreign/c/${LIBRARY}/README.html
-TESTFILE=foreign/c/${LIBRARY}/test.scm
+LIBRARY_FILE=retropikzel/${LIBRARY}.sld
+VERSION=$(shell cat retropikzel/${LIBRARY}/VERSION)
+DESCRIPTION=$(shell head -n1 retropikzel/${LIBRARY}/README.md)
+README=retropikzel/${LIBRARY}/README.html
+TESTFILE=retropikzel/${LIBRARY}/test.scm
 
 PKG=foreign-c-${LIBRARY}-${VERSION}.tgz
-TMPDIR=tmp/${LIBRARY}/${SCHEME}
+TMPDIR=.tmp/${LIBRARY}/${SCHEME}
 
 DOCKERIMG=${SCHEME}:head
 ifeq "${SCHEME}" "chicken"
@@ -19,8 +19,8 @@ endif
 
 all: build
 
-build: foreign/c/${LIBRARY}/LICENSE foreign/c/${LIBRARY}/VERSION
-	echo "<pre>$$(cat foreign/c/${LIBRARY}/README.md)</pre>" > ${README}
+build: retropikzel/${LIBRARY}/LICENSE retropikzel/${LIBRARY}/VERSION
+	echo "<pre>$$(cat retropikzel/${LIBRARY}/README.md)</pre>" > ${README}
 	snow-chibi package --version=${VERSION} --authors=${AUTHOR} --doc=${README} --description="${DESCRIPTION}" ${LIBRARY_FILE}
 
 install:
@@ -30,21 +30,34 @@ uninstall:
 	-snow-chibi remove --impls=${SCHEME} ${PKG}
 
 tmpdir:
-	@mkdir -p ${TMPDIR}
-	@cp ${TESTFILE} ${TMPDIR}/
-	@mkdir -p ${TMPDIR}/foreign/c
-	@cp -r foreign/c/${LIBRARY} ${TMPDIR}/foreign/c/
-	@cp -r foreign/c/${LIBRARY}.s* ${TMPDIR}/foreign/c/
+	mkdir -p ${TMPDIR}
+	cp ${TESTFILE} ${TMPDIR}/
+	mkdir -p ${TMPDIR}/retropikzel
+	cp -r retropikzel/${LIBRARY} ${TMPDIR}/retropikzel/
+	cp -r retropikzel/${LIBRARY}.s* ${TMPDIR}/retropikzel/
 
-test: tmpdir
-	echo "Hello"
-	cd ${TMPDIR} && COMPILE_R7RS=${SCHEME} compile-scheme -I . -o test test.scm
-	cd ${TMPDIR} && printf "\n" | ./test
+test-r7rs: tmpdir
+	cd ${TMPDIR} && echo "(import (scheme base) (scheme write) (scheme file) (scheme process-context) (retropikzel ${LIBRARY}) (srfi 64))" > test-r7rs.scm
+	cd ${TMPDIR} && cat retropikzel/${LIBRARY}/test.scm >> test-r7rs.scm
+	cd ${TMPDIR} && COMPILE_R7RS=${SCHEME} compile-scheme -I . -o test-r7rs test-r7rs.scm
+	cd ${TMPDIR} && printf "\n" | ./test-r7rs
 
-test-docker: tmpdir
-	docker build --build-arg IMAGE=${DOCKERIMG} --build-arg SCHEME=${SCHEME} --tag=foreign-c-library-test-${SCHEME} -f Dockerfile.test . 2> ${TMPDIR}/docker.log || cat ${TMPDIR}/docker.log
-	docker run -v "${PWD}:/workdir" -w /workdir -t foreign-c-library-test-${SCHEME} \
-		sh -c "make SCHEME=${SCHEME} test; chmod -R 755 ${TMPDIR}"
+test-r7rs-docker:
+	docker build --build-arg IMAGE=${DOCKERIMG} --build-arg SCHEME=${SCHEME} --tag=foreign-c-library-test-${SCHEME} -f Dockerfile.test .
+	docker run -t foreign-c-library-test-${SCHEME} sh -c "make SCHEME=${SCHEME} test-r7rs"
+
+test-r6rs: tmpdir
+	cp -r ../foreign-c/foreign ${TMPDIR}/
+	cd ${TMPDIR} && echo "(import (rnrs) (retropikzel ${LIBRARY}) (srfi :64))" > test-r6rs.sps
+	cd ${TMPDIR} && cat retropikzel/${LIBRARY}/test.scm >> test-r6rs.sps
+	cd ${TMPDIR} && akku install chez-srfi akku-r7rs
+	cd ${TMPDIR} && COMPILE_R7RS=${SCHEME} compile-scheme -I .akku/lib -o test-r6rs test-r6rs.sps
+	cd ${TMPDIR} && ./test-r6rs
+
+test-r6rs-docker:
+	docker build --build-arg IMAGE=${DOCKERIMG} --build-arg SCHEME=${SCHEME} --tag=foreign-c-library-test-${SCHEME} -f Dockerfile.test .
+	docker run -t foreign-c-library-test-${SCHEME} sh -c "make SCHEME=${SCHEME} test-r6rs"
+
 
 clean:
 	git clean -X -f

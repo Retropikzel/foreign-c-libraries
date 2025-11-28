@@ -1,0 +1,29 @@
+
+#|
+exec chibi-scheme  -I . "$0" "$@"
+|#
+(import (scheme base) (scheme write) (scheme file) (scheme process-context) (retropikzel system) (srfi 64))
+
+(test-begin "foreign-c-system")
+
+(define testfile "/tmp/foreign-c-system-test.txt")
+
+(define exit-code1 (system (apply string-append `("echo \"Hello\" > " ,testfile))))
+
+(test-assert (= exit-code1 0))
+
+(define (read-all result)
+  (let ((c (read-char)))
+    (if (eof-object? c)
+      result
+      (read-all (string-append result (string c))))))
+
+(define text (with-input-from-file testfile (lambda () (read-all ""))))
+
+(test-assert (string=? text "Hello"))
+
+(define exit-code2 (system "no-such-command 2> /dev/null"))
+
+(test-assert (> exit-code2 0))
+
+(test-end "foreign-c-system")
