@@ -1,1 +1,0 @@
-../../../../foreign/c/libc.scm

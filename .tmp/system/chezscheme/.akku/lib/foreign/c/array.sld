@@ -1,1 +1,0 @@
-../../../../foreign/c/array.sld
