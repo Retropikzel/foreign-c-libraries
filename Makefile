@@ -29,8 +29,12 @@ install:
 uninstall:
 	-snow-chibi remove --impls=${SCHEME} ${PKG}
 
-tmpdir:
+.akku:
+	akku install chez-srfi akku-r7rs "(foreign c)"
+
+tmpdir: .akku
 	mkdir -p ${TMPDIR}
+	cp -r .akku ${TMPDIR}/
 	cp ${TESTFILE} ${TMPDIR}/
 	mkdir -p ${TMPDIR}/retropikzel
 	cp -r retropikzel/${LIBRARY} ${TMPDIR}/retropikzel/
@@ -43,19 +47,18 @@ test-r7rs: tmpdir
 	cd ${TMPDIR} && printf "\n" | ./test-r7rs
 
 test-r7rs-docker:
-	docker build --build-arg IMAGE=${DOCKERIMG} --build-arg SCHEME=${SCHEME} --tag=foreign-c-library-test-${SCHEME} -f Dockerfile.test .
+	docker build --build-arg IMAGE=${DOCKERIMG} --build-arg SCHEME=${SCHEME} --tag=foreign-c-library-test-${SCHEME} .
 	docker run -t foreign-c-library-test-${SCHEME} sh -c "make SCHEME=${SCHEME} test-r7rs"
 
 test-r6rs: tmpdir
-	cp -r ../foreign-c/foreign ${TMPDIR}/
 	cd ${TMPDIR} && echo "(import (rnrs) (retropikzel ${LIBRARY}) (srfi :64))" > test-r6rs.sps
 	cd ${TMPDIR} && cat retropikzel/${LIBRARY}/test.scm >> test-r6rs.sps
-	cd ${TMPDIR} && akku install chez-srfi akku-r7rs
+	cd ${TMPDIR} && akku install
 	cd ${TMPDIR} && COMPILE_R7RS=${SCHEME} compile-scheme -I .akku/lib -o test-r6rs test-r6rs.sps
 	cd ${TMPDIR} && ./test-r6rs
 
 test-r6rs-docker:
-	docker build --build-arg IMAGE=${DOCKERIMG} --build-arg SCHEME=${SCHEME} --tag=foreign-c-library-test-${SCHEME} -f Dockerfile.test .
+	docker build --build-arg IMAGE=${DOCKERIMG} --build-arg SCHEME=${SCHEME} --tag=foreign-c-library-test-${SCHEME} .
 	docker run -t foreign-c-library-test-${SCHEME} sh -c "make SCHEME=${SCHEME} test-r6rs"
 
 
