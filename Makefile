@@ -36,7 +36,7 @@ test-r7rs:
 
 test-r7rs-docker:
 	docker build --build-arg IMAGE=${DOCKERIMG} --build-arg SCHEME=${SCHEME} --tag=foreign-c-library-test-${SCHEME} .
-	docker run -t foreign-c-library-test-${SCHEME} sh -c "make SCHEME=${SCHEME} LIBRARY=${LIBRARY} build install test-r7rs"
+	docker run -t foreign-c-library-test-${SCHEME} sh -c "make SCHEME=${SCHEME} LIBRARY=${LIBRARY} SNOW_CHIBI_ARGS=--always-yes build install test-r7rs"
 
 test-r6rs:
 	echo "(import (rnrs) (retropikzel ${LIBRARY}) (srfi :64))" > test-r6rs.sps
