@@ -3,4 +3,6 @@
 *.swo
 *.tgz
 .*
+Akku.lock
+Akku.manifest
 
