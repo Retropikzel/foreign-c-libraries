@@ -33,7 +33,7 @@ pipeline {
                             params.LIBRARIES.split().each { LIBRARY ->
                                 params.R6RS_SCHEMES.split().each { SCHEME ->
                                     def IMG="${SCHEME}:head"
-                                    stage("${SCHEME} - ${LIBRARY}") {k
+                                    stage("${SCHEME} - ${LIBRARY}") {
                                         catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                                             sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} test-r6rs-docker"
                                         }
