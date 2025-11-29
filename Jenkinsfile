@@ -35,7 +35,7 @@ pipeline {
                                     def IMG="${SCHEME}:head"
                                     stage("${SCHEME} - ${LIBRARY}") {k
                                         catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                                            sh "timeout 6000 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} test-r6rs-docker"
+                                            sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} test-r6rs-docker"
                                         }
                                     }
                                 }
@@ -54,7 +54,7 @@ pipeline {
                                     }
                                     stage("${SCHEME} - ${LIBRARY}") {
                                         catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                                            sh "timeout 6000 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} test-r7rs-docker"
+                                            sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} test-r7rs-docker"
                                         }
                                     }
                                 }

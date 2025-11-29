@@ -1,4 +1,5 @@
 .SILENT: build install test test-docker clean
+.PHONY: test-r6rs test-r7rs
 SCHEME=chibi
 LIBRARY=system
 AUTHOR=Retropikzel

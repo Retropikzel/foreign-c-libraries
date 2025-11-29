@@ -5,4 +5,16 @@
 .*
 Akku.lock
 Akku.manifest
+foreign
+*.log
+*.a
+*.o
+*.so
+*.c
+*.import.scm
+*.link
+test-r6rs.sps
+test-r6rs
+test-r7rs.scm
+test-r7rs
 
