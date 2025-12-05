@@ -2,11 +2,18 @@
         (scheme write)
         (scheme file)
         (scheme process-context)
-        (foreign c shell)
+        (retropikzel shell)
         (srfi 64))
 
-(test-begin "foreign-c-shell")
+(test-begin "shell")
 
-(display "Hello")
+(write (shell "ls"))
+(newline)
 
-(test-end "foreign-c-shell")
+(write (shell->list "ls"))
+(newline)
+
+(write (shell->sexp "echo '(1 2 3)'"))
+(newline)
+
+(test-end "shell")

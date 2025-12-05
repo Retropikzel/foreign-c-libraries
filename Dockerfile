@@ -36,8 +36,8 @@ RUN bash install.sh
 ENV PATH=/root/.local/bin:${PATH}
 RUN akku update
 WORKDIR /build/foreign-c
-RUN if [ ! "${SCHEME}" = "racket" ]; then timeout 30 snow-chibi install --impls=${SCHEME} --always-yes "(srfi 64)"; fi
-RUN if [ ! "${SCHEME}" = "larceny" ]; then timeout 30 snow-chibi install --impls=${SCHEME} --always-yes "(foreign c)"; fi
+RUN timeout 30 snow-chibi install --impls=${SCHEME} --always-yes "(srfi 64)" || true
+RUN timeout 30 snow-chibi install --impls=${SCHEME} --always-yes "(foreign c)" || true
 RUN make SCHEME=${SCHEME} build install
 WORKDIR /workdir
 RUN cp -r /build/foreign-c/foreign .

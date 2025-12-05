@@ -1,8 +1,14 @@
 (define-library
-  (foreign c shell)
+  (retropikzel shell)
   (import (scheme base)
+          (scheme write)
+          (scheme read)
+          (scheme file)
+          (foreign c)
           (retropikzel named-pipes))
-  (export shell)
+  (export shell
+          shell->list
+          shell->sexp)
   (include "shell.scm"))
 
 

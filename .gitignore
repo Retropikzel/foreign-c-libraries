@@ -17,4 +17,5 @@ test-r6rs.sps
 test-r6rs
 test-r7rs.scm
 test-r7rs
+*.html
 

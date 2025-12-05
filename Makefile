@@ -1,4 +1,4 @@
-.SILENT: build install test test-docker clean
+.SILENT: build install test-r6rs test-r6rs-docker test-r7rs test-r7rs-docker clean
 .PHONY: test-r6rs test-r7rs
 SCHEME=chibi
 LIBRARY=system
@@ -36,7 +36,8 @@ test-r7rs:
 	printf "\n" | ./test-r7rs
 
 test-r7rs-docker:
-	docker build --build-arg IMAGE=${DOCKERIMG} --build-arg SCHEME=${SCHEME} --tag=foreign-c-library-test-${SCHEME} .
+	echo "Building docker image..."
+	docker build --build-arg IMAGE=${DOCKERIMG} --build-arg SCHEME=${SCHEME} --tag=foreign-c-library-test-${SCHEME} --quiet .
 	docker run -t foreign-c-library-test-${SCHEME} sh -c "make SCHEME=${SCHEME} LIBRARY=${LIBRARY} SNOW_CHIBI_ARGS=--always-yes build install test-r7rs"
 
 test-r6rs:
@@ -47,7 +48,8 @@ test-r6rs:
 	./test-r6rs
 
 test-r6rs-docker:
-	docker build --build-arg IMAGE=${DOCKERIMG} --build-arg SCHEME=${SCHEME} --tag=foreign-c-library-test-${SCHEME} .
+	echo "Building docker image..."
+	docker build --build-arg IMAGE=${DOCKERIMG} --build-arg SCHEME=${SCHEME} --tag=foreign-c-library-test-${SCHEME} --quiet .
 	docker run -t foreign-c-library-test-${SCHEME} sh -c "make SCHEME=${SCHEME} LIBRARY=${LIBRARY} test-r6rs"
 
 clean:
