@@ -32,4 +32,4 @@
   (lines->list (open-input-string (shell cmd)) '()))
 
 (define (shell->sexp cmd)
-  (read (open-input-string (shell cmd)) '()))
+  (read (open-input-string (shell cmd))))
