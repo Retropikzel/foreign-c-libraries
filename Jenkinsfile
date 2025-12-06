@@ -49,7 +49,7 @@ pipeline {
                         script {
                             params.LIBRARIES.split().each { LIBRARY ->
                                 stage("${LIBRARY}") {
-                                    parallel params.R7RS_SCHEMES.collectEntries().each { SCHEME ->
+                                    params.R7RS_SCHEMES.collectEntries() { SCHEME ->
                                         [(SCHEME): {
                                             def IMG="${SCHEME}:head"
                                             if("${SCHEME}" == "chicken") {
