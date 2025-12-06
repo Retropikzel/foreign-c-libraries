@@ -32,10 +32,8 @@ pipeline {
                                     parallel params.R6RS_SCHEMES.split().collectEntries { SCHEME ->
                                         [(SCHEME): {
                                             def IMG="${SCHEME}:head"
-                                            stage("${SCHEME} - ${LIBRARY}") {
-                                                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                                                    sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} test-r6rs-docker"
-                                                }
+                                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                                sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} test-r6rs-docker"
                                             }
                                         }]
                                     }
@@ -55,10 +53,8 @@ pipeline {
                                             if("${SCHEME}" == "chicken") {
                                                 IMG="${SCHEME}:5"
                                             }
-                                            stage("${SCHEME} - ${LIBRARY}") {
-                                                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                                                    sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} test-r7rs-docker"
-                                                }
+                                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                                sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} test-r7rs-docker"
                                             }
                                         }]
                                     }
