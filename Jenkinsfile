@@ -51,15 +51,13 @@ pipeline {
                                 stage("${LIBRARY}") {
                                     parallel params.R7RS_SCHEMES.collectEntries().each { SCHEME ->
                                         [(SCHEME): {
-                                            lock {
-                                                def IMG="${SCHEME}:head"
-                                                if("${SCHEME}" == "chicken") {
-                                                    IMG="${SCHEME}:5"
-                                                }
-                                                stage("${SCHEME} - ${LIBRARY}") {
-                                                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                                                        sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} test-r7rs-docker"
-                                                    }
+                                            def IMG="${SCHEME}:head"
+                                            if("${SCHEME}" == "chicken") {
+                                                IMG="${SCHEME}:5"
+                                            }
+                                            stage("${SCHEME} - ${LIBRARY}") {
+                                                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                                    sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} test-r7rs-docker"
                                                 }
                                             }
                                         }]
