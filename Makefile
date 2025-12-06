@@ -32,8 +32,8 @@ uninstall:
 test-r7rs:
 	echo "(import (scheme base) (scheme write) (scheme file) (scheme process-context) (foreign c) (retropikzel ${LIBRARY}) (srfi 64))" > test-r7rs.scm
 	cat retropikzel/${LIBRARY}/test.scm >> test-r7rs.scm
-	COMPILE_R7RS=${SCHEME} compile-scheme -I . -o test-r7rs test-r7rs.scm
-	printf "\n" | ./test-r7rs
+	COMPILE_R7RS=${SCHEME} timeout 60 compile-scheme -I . -o test-r7rs test-r7rs.scm
+	printf "\n" | timeout 60 ./test-r7rs
 
 test-r7rs-docker:
 	echo "Building docker image..."
@@ -44,8 +44,8 @@ test-r6rs:
 	echo "(import (rnrs) (foreign c) (retropikzel ${LIBRARY}) (srfi :64))" > test-r6rs.sps
 	cat retropikzel/${LIBRARY}/test.scm >> test-r6rs.sps
 	akku install chez-srfi akku-r7rs
-	COMPILE_R7RS=${SCHEME} compile-scheme -I .akku/lib -o test-r6rs test-r6rs.sps
-	./test-r6rs
+	COMPILE_R7RS=${SCHEME} timeout 60 compile-scheme -I .akku/lib -o test-r6rs test-r6rs.sps
+	timeout 60 ./test-r6rs
 
 test-r6rs-docker:
 	echo "Building docker image..."
