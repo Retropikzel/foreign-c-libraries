@@ -1,8 +1,8 @@
 pipeline {
     agent {
-        docker {
+        dockerfile {
             label 'docker-x86_64'
-            image 'debian'
+            filename 'Dockerfile.jenkins'
             args '--user=root --privileged -v /var/run/docker.sock:/var/run/docker.sock'
         }
     }
@@ -22,52 +22,46 @@ pipeline {
     }
 
     stages {
-        stage('Init') {
-            steps {
-                sh "apt-get update && apt-get install -y make docker.io git"
-            }
-        }
-
         stage('Tests') {
             parallel {
-                stage('R6RS x86_64 Debian') {
+                /*
+                stage('R6RS') {
+                    steps {
                         script {
                             params.LIBRARIES.split().each { LIBRARY ->
-                                stage("${LIBRARY}") {
-                                    stages {
-                                        params.R6RS_SCHEMES.split().each { SCHEME ->
-                                            def IMG="${SCHEME}:head"
-                                            stage("${SCHEME} - ${LIBRARY}") {
-                                                steps {
-                                                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                                                        sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} test-r6rs-docker"
-                                                    }
-                                                }
+                            stage("${LIBRARY}") {
+                                    params.R6RS_SCHEMES.split().each { SCHEME ->
+                                        def IMG="${SCHEME}:head"
+                                        stage("${SCHEME} - ${LIBRARY}") {
+                                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                                sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} test-r6rs-docker"
                                             }
                                         }
                                     }
                                 }
                             }
                         }
+                    }
                 }
-                stage('R7RS x86_64 Debian') {
+                */
+                stage('R7RS') {
                     steps {
                         script {
                             params.LIBRARIES.split().each { LIBRARY ->
                                 stage("${LIBRARY}") {
-                                    stages {
-                                        params.R7RS_SCHEMES.split().each { SCHEME ->
-                                            def IMG="${SCHEME}:head"
-                                            if("${SCHEME}" == "chicken") {
-                                                IMG="${SCHEME}:5"
-                                            }
-                                            stage("${SCHEME} - ${LIBRARY}") {
-                                                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                                                    sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} test-r7rs-docker"
-                                                }
+                                    params.R7RS_SCHEMES.collectEntries().each { SCHEME ->
+                                    [(SCHEME): {
+                                        def IMG="${SCHEME}:head"
+                                        if("${SCHEME}" == "chicken") {
+                                            IMG="${SCHEME}:5"
+                                        }
+                                        stage("${SCHEME} - ${LIBRARY}") {
+                                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                                sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} test-r7rs-docker"
                                             }
                                         }
                                     }
+                                    }]
                                 }
                             }
                         }
