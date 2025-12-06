@@ -28,36 +28,40 @@ pipeline {
         stage('Tests') {
             parallel {
                 stage('R6RS x86_64 Debian') {
-                    steps {
                         script {
                             params.LIBRARIES.split().each { LIBRARY ->
                                 stage("${LIBRARY}") {
-                                    params.R6RS_SCHEMES.split().each { SCHEME ->
-                                        def IMG="${SCHEME}:head"
-                                        stage("${SCHEME} - ${LIBRARY}") {
-                                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                                                sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} test-r6rs-docker"
+                                    stages {
+                                        params.R6RS_SCHEMES.split().each { SCHEME ->
+                                            def IMG="${SCHEME}:head"
+                                            stage("${SCHEME} - ${LIBRARY}") {
+                                                steps {
+                                                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                                        sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} test-r6rs-docker"
+                                                    }
+                                                }
                                             }
                                         }
                                     }
                                 }
                             }
                         }
-                    }
                 }
                 stage('R7RS x86_64 Debian') {
                     steps {
                         script {
                             params.LIBRARIES.split().each { LIBRARY ->
                                 stage("${LIBRARY}") {
-                                    params.R7RS_SCHEMES.split().each { SCHEME ->
-                                        def IMG="${SCHEME}:head"
-                                        if("${SCHEME}" == "chicken") {
-                                            IMG="${SCHEME}:5"
-                                        }
-                                        stage("${SCHEME} - ${LIBRARY}") {
-                                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                                                sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} test-r7rs-docker"
+                                    stages {
+                                        params.R7RS_SCHEMES.split().each { SCHEME ->
+                                            def IMG="${SCHEME}:head"
+                                            if("${SCHEME}" == "chicken") {
+                                                IMG="${SCHEME}:5"
+                                            }
+                                            stage("${SCHEME} - ${LIBRARY}") {
+                                                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                                    sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} test-r7rs-docker"
+                                                }
                                             }
                                         }
                                     }
