@@ -48,19 +48,19 @@ pipeline {
                     steps {
                         script {
                             params.LIBRARIES.split().each { LIBRARY ->
-                                stage("${LIBRARY}") {
-                                    params.R7RS_SCHEMES.collectEntries().each { SCHEME ->
-                                    [(SCHEME): {
-                                        def IMG="${SCHEME}:head"
-                                        if("${SCHEME}" == "chicken") {
-                                            IMG="${SCHEME}:5"
-                                        }
-                                        stage("${SCHEME} - ${LIBRARY}") {
-                                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                                                sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} test-r7rs-docker"
+                                stage(name: "${LIBRARY}", concurrency: 1) {
+                                    parallel params.R7RS_SCHEMES.collectEntries().each { SCHEME ->
+                                        [(SCHEME): {
+                                            def IMG="${SCHEME}:head"
+                                            if("${SCHEME}" == "chicken") {
+                                                IMG="${SCHEME}:5"
                                             }
-                                        }
-                                    }]
+                                            stage("${SCHEME} - ${LIBRARY}") {
+                                                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                                    sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} test-r7rs-docker"
+                                                }
+                                            }
+                                        }]
                                     }
                                 }
                             }
