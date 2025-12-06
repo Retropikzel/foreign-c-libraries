@@ -6,6 +6,8 @@
 (define-c-procedure c-tempnam libc 'tempnam 'pointer '(pointer pointer))
 (define-c-procedure c-system libc 'system 'int '(pointer))
 
+(define previous-exit-code #f)
+
 (define (shell cmd)
   (let* ((temp-prefix (string->c-utf8 "npcmd"))
          (temp-name (lambda ()
@@ -19,7 +21,7 @@
                                        input-path
                                        " & ")))
     (create-pipe input-path 0777)
-    (c-system (string->c-utf8 shell-command))
+    (set! previous-exit-code (c-system (string->c-utf8 shell-command)))
     (pipe-read-string 64000 (open-input-pipe input-path #t))))
 
 (define (lines->list port result)
@@ -33,3 +35,5 @@
 
 (define (shell->sexp cmd)
   (read (open-input-string (shell cmd))))
+
+(define (shell-exit-code) previous-exit-code)

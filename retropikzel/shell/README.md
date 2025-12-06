@@ -15,3 +15,7 @@ Run given cmd string and return output as list of lines.
 
 Run given cmd string and return output as sexp using read.
 
+
+(**shell-exit-code**)
+
+Returns exit code of previous command that was run.

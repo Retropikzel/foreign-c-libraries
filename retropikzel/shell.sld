@@ -8,7 +8,8 @@
           (retropikzel named-pipes))
   (export shell
           shell->list
-          shell->sexp)
+          shell->sexp
+          shell-exit-code)
   (include "shell.scm"))
 
 
