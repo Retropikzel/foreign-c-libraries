@@ -18,7 +18,7 @@ pipeline {
         //string(name: 'R6RS_SCHEMES', defaultValue: 'chezscheme guile ikarus ironscheme mosh racket sagittarius ypsilon', description: '')
         string(name: 'R6RS_SCHEMES', defaultValue: 'chezscheme ikarus', description: '')
         //string(name: 'R6RS_SCHEMES', defaultValue: 'chezscheme', description: '')
-        string(name: 'LIBRARIES', defaultValue: 'system', description: '')
+        string(name: 'LIBRARIES', defaultValue: 'system shell', description: '')
     }
 
     stages {
