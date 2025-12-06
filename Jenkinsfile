@@ -60,7 +60,6 @@ pipeline {
                                                 sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} test-r7rs-docker"
                                             }
                                         }
-                                    }
                                     }]
                                 }
                             }
