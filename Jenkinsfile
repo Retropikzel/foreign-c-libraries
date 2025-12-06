@@ -14,9 +14,9 @@ pipeline {
 
     parameters {
         //string(name: 'R7RS_SCHEMES', defaultValue: 'chibi chicken gauche guile kawa mosh racket sagittarius stklos ypsilon', description: '')
-        string(name: 'R7RS_SCHEMES', defaultValue: 'chibi', description: '')
+        string(name: 'R7RS_SCHEMES', defaultValue: 'chibi kawa', description: '')
         //string(name: 'R6RS_SCHEMES', defaultValue: 'chezscheme guile ikarus ironscheme mosh racket sagittarius ypsilon', description: '')
-        string(name: 'R6RS_SCHEMES', defaultValue: 'chezscheme', description: '')
+        string(name: 'R6RS_SCHEMES', defaultValue: 'chezscheme ikarus', description: '')
         //string(name: 'R6RS_SCHEMES', defaultValue: 'chezscheme', description: '')
         string(name: 'LIBRARIES', defaultValue: 'system', description: '')
     }
@@ -24,17 +24,18 @@ pipeline {
     stages {
         stage('Tests') {
             parallel {
-                /*
                 stage('R6RS') {
                     steps {
                         script {
                             params.LIBRARIES.split().each { LIBRARY ->
                             stage("${LIBRARY}") {
-                                    params.R6RS_SCHEMES.split().each { SCHEME ->
-                                        def IMG="${SCHEME}:head"
-                                        stage("${SCHEME} - ${LIBRARY}") {
-                                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                                                sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} test-r6rs-docker"
+                                    parallel params.R6RS_SCHEMES.split().collectEntries { SCHEME ->
+                                        [(SCHEME): {
+                                            def IMG="${SCHEME}:head"
+                                            stage("${SCHEME} - ${LIBRARY}") {
+                                                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                                    sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} test-r6rs-docker"
+                                                }
                                             }
                                         }
                                     }
@@ -43,7 +44,6 @@ pipeline {
                         }
                     }
                 }
-                */
                 stage('R7RS') {
                     steps {
                         script {
