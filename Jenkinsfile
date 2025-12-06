@@ -30,12 +30,14 @@ pipeline {
                 stage('R6RS x86_64 Debian') {
                     steps {
                         script {
-                            params.LIBRARIES.split().each { LIBRARY ->
-                                params.R6RS_SCHEMES.split().each { SCHEME ->
-                                    def IMG="${SCHEME}:head"
-                                    stage("${SCHEME} - ${LIBRARY}") {
-                                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                                            sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} test-r6rs-docker"
+                            stages {
+                                params.LIBRARIES.split().each { LIBRARY ->
+                                    params.R6RS_SCHEMES.split().each { SCHEME ->
+                                        def IMG="${SCHEME}:head"
+                                        stage("${SCHEME} - ${LIBRARY}") {
+                                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                                sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} test-r6rs-docker"
+                                            }
                                         }
                                     }
                                 }
