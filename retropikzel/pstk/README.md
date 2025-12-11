@@ -1,9 +1,6 @@
-# pffi-pstk
+Use Tk GUI from Scheme
 
-pffi-pstk is a library for using
-[tk](https://en.wikipedia.org/wiki/Tk_(software)) gui library from Scheme
-using [R7RS-PFFI](https://git.sr.ht/~retropikzel/r7rs-pffi). It is a new
-chapter in the long continuation of porting the pstk library.
+A new chapter in the long continuation of porting the pstk library.
 
 
 The starting code was taken from
