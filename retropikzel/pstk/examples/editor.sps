@@ -1,5 +1,4 @@
-(import (scheme base)
-        (scheme write)
+(import (rnrs)
         (retropikzel pstk))
 
 (define tk (tk-start))

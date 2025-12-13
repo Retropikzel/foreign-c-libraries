@@ -105,6 +105,7 @@
           (scheme read)
           (scheme file)
           (scheme write)
+          (scheme process-context)
           (foreign c)
           (retropikzel named-pipes))
   (export tk-eval

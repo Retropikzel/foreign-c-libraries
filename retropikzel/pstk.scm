@@ -41,12 +41,7 @@
 (define *wish-debug-input* (if (get-environment-variable "PSTK_DEBUG") #t #f))
 (define *wish-debug-output* (if (get-environment-variable "PSTK_DEBUG") #t #f))
 
-(define *use-keywords?*
-  (cond-expand (chicken #t)
-               (else (or (not (symbol? 'text:))
-                         (not (symbol? ':text))
-                         (string=? "text" (symbol->string 'text:))
-                         (string=? "text" (symbol->string ':text))))))
+(define *use-keywords?* #t)
 
 (define (keyword? x) #f)        ;; TODO: handle keywords?
 (define (keyword->string x) x)

@@ -1,9 +1,9 @@
 .SILENT: build install test-r6rs test-r6rs-docker test-r7rs test-r7rs-docker clean
-.PHONY: test-r6rs test-r7rs
+.PHONY: test-r6rs test-r7rs example.scm example.sps
 SCHEME=chibi
 LIBRARY=system
 EXAMPLE=editor
-EXAMPLE_FILE=retropikzel/${LIBRARY}/examples/${EXAMPLE}.scm
+EXAMPLE_FILE=retropikzel/${LIBRARY}/examples/${EXAMPLE}
 AUTHOR=Retropikzel
 
 LIBRARY_FILE=retropikzel/${LIBRARY}.sld
@@ -42,8 +42,11 @@ test-r7rs-docker:
 	docker build --build-arg IMAGE=${DOCKERIMG} --build-arg SCHEME=${SCHEME} --tag=foreign-c-library-test-${SCHEME} --quiet .
 	docker run -t foreign-c-library-test-${SCHEME} sh -c "make SCHEME=${SCHEME} LIBRARY=${LIBRARY} SNOW_CHIBI_ARGS=--always-yes build install test-r7rs"
 
-example-r7rs: ${EXAMPLE_FILE}
-	COMPILE_R7RS=${SCHEME} compile-scheme -I . -o example ${EXAMPLE_FILE}
+example.scm: ${EXAMPLE_FILE}.scm
+	cp ${EXAMPLE_FILE}.scm example.scm
+
+example-r7rs: example.scm
+	COMPILE_R7RS=${SCHEME} compile-scheme -I . -o example example.scm
 	./example
 
 test-r6rs:
@@ -57,6 +60,14 @@ test-r6rs-docker:
 	echo "Building docker image..."
 	docker build --build-arg IMAGE=${DOCKERIMG} --build-arg SCHEME=${SCHEME} --tag=foreign-c-library-test-${SCHEME} --quiet .
 	docker run -t foreign-c-library-test-${SCHEME} sh -c "make SCHEME=${SCHEME} LIBRARY=${LIBRARY} test-r6rs"
+
+example.sps: ${EXAMPLE_FILE}.sps
+	cp ${EXAMPLE_FILE}.scm example.sps
+
+example-r6rs: example.sps
+	akku install akku-r7rs "(foreign c)"
+	COMPILE_R7RS=${SCHEME} compile-scheme -I .akku/lib -o example example.sps
+	./example
 
 clean:
 	git clean -X -f

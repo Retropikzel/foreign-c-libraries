@@ -19,5 +19,6 @@ test-r7rs.scm
 test-r7rs
 *.html
 *.rkt
+example.scm
+example.sps
 example
-
