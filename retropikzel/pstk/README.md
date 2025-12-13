@@ -12,6 +12,7 @@ The library now uses (retropikzel named-pipes) library, which uses (foreign c)
 underneath. It should work on any implementation those libraries work on.
 
 
+Set PSTK_DEBUG environment variable to see debug output.
 
 ### 1.1. Simple Example
 

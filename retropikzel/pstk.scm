@@ -38,8 +38,8 @@
           (open-output-pipe output-path))))
 
 (define *wish-program* "tclsh")
-(define *wish-debug-input* #t)
-(define *wish-debug-output* #t)
+(define *wish-debug-input* (if (get-environment-variable "PSTK_DEBUG") #t #f))
+(define *wish-debug-output* (if (get-environment-variable "PSTK_DEBUG") #t #f))
 
 (define *use-keywords?*
   (cond-expand (chicken #t)
