@@ -12,41 +12,6 @@ The library now uses (retropikzel named-pipes) library, which uses (foreign c)
 underneath. It should work on any implementation those libraries work on.
 
 
-The rest of this document is the original readme, cleaned up from HTML to markdown.
-
-
-
-# Documentation for PS/Tk
-
-For more information
-including compatibility, examples and test cases, see
-[https://github.com/petercrlane/r7rs-
-libs](https://github.com/petercrlane/r7rs-libs) ## 1. PS/Tk: Tk Graphical User
-Interface Toolkit To use the library: (import (rebottled pstk)) The PS/Tk
-library enables a Scheme program to interact with Tk, to create cross-platform
-graphical user interfaces. Virtually all of Tcl/Tk is available through
-Scheme. Other examples of using Tk in this way include [LTk](http://www.peter-
-herth.de/ltk/) from Lisp, [Tkinter](https://wiki.python.org/moin/TkInter) from
-Python, Perl/Tk and Ruby/Tk. PS/Tk must communicate with the separate Tcl/Tk
-program, a process managed in an implementation-specific manner. The current
-R7RS version of PS/Tk has support for, and has been tested on, the following:
-\- Chibi Scheme: under Linux (calls to "/bin/sh") \- Gauche Scheme: under
-Linux (calls to "/bin/sh") \- Sagittarius Scheme: under Linux and Windows.
-(Should work on Mac OS too.) Further Scheme versions or platforms can be added
-by extending the `cond-expand` statement in the source code. For more
-information: \- Several small examples of using the library are available from
-[a github repository](https://github.com/petercrlane/r7rs-
-libs/tree/master/rebottled-examples/pstk) \- Some notes on using PS/Tk with
-Sagittarius Scheme on Linux and Windows: [http://peterlane.info/notes/gui-
-programs-with-sagittarius-scheme.html](http://peterlane.info/notes/gui-
-programs-with-sagittarius-scheme.html) \- Documentation about Tk:
-[https://www.tcl.tk/man/tcl8.6/TkCmd/contents.htm"](https://www.tcl.tk/man/tcl8.6/TkCmd/contents.htm)
-\- Some documentation on using Tk from various languages:
-[http://www.tkdocs.com/](http://www.tkdocs.com/)
-![http://peterlane.info/images/pstk-
-win.jpg](http://peterlane.info/images/pstk-win.jpg)
-
-
 
 ### 1.1. Simple Example
 
@@ -73,9 +38,6 @@ Get started with the following program:
 
   4. Starts the TK event loop.
 
-![http://peterlane.info/images/pstk-
-hello.png](http://peterlane.info/images/pstk-hello.png)
-
 
 
 ### 1.2. Working with Widgets
@@ -91,13 +53,13 @@ parent widget and provide some structure. In PS/Tk we instead represent
 widgets as functions; these functions take a _command_ and associated
 arguments. Commands that the widgets respond to include:
 
-  * get-id: returns the Tk id 
+  * get-id: returns the Tk id
 
-  * create-widget: used to create a child widget 
+  * create-widget: used to create a child widget
 
-  * configure: used to alter parameters of a widget 
+  * configure: used to alter parameters of a widget
 
-  * cget: returns value of a configuration option 
+  * cget: returns value of a configuration option
 
 For example, having created a button, we can later change the displayed text
 using `configure`, or retrieve the text using `cget`:
@@ -145,11 +107,7 @@ Tcl's "1"/"0", symbols can be used in place of strings, etc.
 
 Creating a widget is done through the `create-widget` command mentioned above:
 
-    
-    
     button .hello -text Hello -command {puts stdout "Hello world"}
-    
-    
     (define hello
       (tk 'create-widget 'button
           'text: "Hello"
@@ -169,8 +127,6 @@ This use of symbols as commands arises elsewhere, for example with `winfo`:
 
 
     winfo screenwidth .           # TCL version
-
-
     (tk/winfo 'screenwidth tk)    ; Scheme version
 
 All the Tk widgets can be created and used in this way. For a list of
@@ -187,6 +143,7 @@ These functions map directly onto underlying Tk functions. The names start
   * `tk/bell` is equivalent to Tk's `bell`
 
   * `tk/choose-color` is equivalent to Tk's `tk_chooseColor`
+
 
 
 
@@ -207,12 +164,13 @@ in the new position and repeating.
 
       (tk/after 1000 (lambda () (hands canvas))))
 
+
+
+
 #### 1.3.2. `tk/appname`
 
 `tk/appname` gets or sets the application name.
 
-    
-    
     sash> (tk/appname)
     "tclsh"
     sash> (tk/appname "new name set")
@@ -220,36 +178,47 @@ in the new position and repeating.
     sash> (tk/appname)
     "new name set"
 
+
+
+
 #### 1.3.3. `tk/bell`
 
 `tk/bell` rings the bell.
+
+
+
 
 #### 1.3.4. `tk/bgerror`
 
 `tk/bgerror` is used to tell the Tcl process that an error has occurred.
 
-#### 1.3.5. `tk/bind`
+
+
+
+#### 1.3.5. `tk/bind!`
 
 `tk/bind` binds actions to events. For example, a function can be called when
 a mouse button is clicked, or a key pressed. First argument is a window, or
 the symbol `all`; second argument is the pattern for the event to bind to; and
 third argument is the function to call.
 
-    
-    
     (tk/bind 'all "<Button-1>" `(,(lambda (x) (display x) (newline) #f) %x))
+
+
+
 
 #### 1.3.6. `tk/bindtags`
 
 `tk/bindtags` gets or sets the binding tags of a given window.
+
+
+
 
 #### 1.3.7. `tk/caret`
 
 `tk/caret` is used to query or set the current caret position in a given
 window.
 
-    
-    
     sash> (tk/caret tk)                            ; **< 1>**
     "-height 0 -x 0 -y 0"
     sash> (tk/caret tk 'height: 10 'x: 2 'y: 3)    ; **< 2>**
@@ -259,39 +228,38 @@ window.
 
   2. Sets the height or x/y position of the caret in the given window. 
 
+
+
+
 #### 1.3.8. `tk/choose-color`
 
 `tk/choose-color` opens a dialog from which to select a colour. Returns the
 RGB code of the selected colour, or "" if cancel is clicked.
 
-    
-    
     sash> (tk/choose-color)
     "#7ce679"
-
-![http://peterlane.info/images/color-
-chooser.png](http://peterlane.info/images/color-chooser.png)
 
 Optional parameters let you select the `initialcolor` `parent` and `title`.
 See the Tk documentation for details:
 <https://www.tcl.tk/man/tcl8.6/TkCmd/chooseColor.htm>
+
+
+
 
 #### 1.3.9. `tk/choose-directory`
 
 `tk/choose-directory` opens a dialog from which to select a directory. Returns
 the directory name as a string or "" if cancel is clicked.
 
-    
-    
     sash> (tk/choose-directory)
     "/home/peter/Software/r7rs-libs"
-
-![http://peterlane.info/images/directory-
-chooser.png](http://peterlane.info/images/directory-chooser.png)
 
 Optional parameters let you select the `initialdir` `parent` `title` and
 whether the chosen directory must exist. See the Tk documentation for details:
 <https://www.tcl.tk/man/tcl8.6/TkCmd/chooseDirectory.htm>
+
+
+
 
 #### 1.3.10. `tk/clipboard`
 
@@ -301,9 +269,15 @@ an action: `append` `clear` `get`
 See Tk documentation for details:
 <https://www.tcl.tk/man/tcl8.6/TkCmd/clipboard.htm>
 
+
+
+
 #### 1.3.11. `tk/destroy`
 
 `tk/destroy` deletes the window or windows given as arguments.
+
+
+
 
 #### 1.3.12. `tk/event`
 
@@ -312,6 +286,8 @@ See Tk documentation for details:
 See the Tk documentation for details:
 <https://www.tcl.tk/man/tcl8.6/TkCmd/event.htm>
 
+
+
 #### 1.3.13. `tk/focus`
 
 `tk/focus` manages the input focus.
@@ -319,54 +295,62 @@ See the Tk documentation for details:
 See the Tk documentation for details:
 <https://www.tcl.tk/man/tcl8.6/TkCmd/focus.htm>
 
+
+
+
 #### 1.3.14. `tk/focus-follows-mouse`
 
 `tk/focus-follows-mouse` changes the focus status so it follows the mouse
 rather than changes with a click.
+
+
+
 
 #### 1.3.15. `tk/focus-next`
 
 `tk/focus-next` returns the next window from the given window, in the focus
 order.
 
+
+
+
 #### 1.3.16. `tk/focus-prev`
 
 `tk/focus-prev` returns the previous window from the given window, in the
 focus order.
+
+
+
 
 #### 1.3.17. `tk/get-open-file`
 
 `tk/get-open-file` opens a dialog from which the user can select a file.
 Returns the file path in a string or "" if cancel is clicked.
 
-    
-    
     sash> (tk/get-open-file)
     "/home/peter/Software/r7rs-libs/rebottled-examples/pstk/example-menu.sps"
-
-![http://peterlane.info/images/pstk-open-file-
-chooser.png](http://peterlane.info/images/pstk-open-file-chooser.png)
 
 Optional parameters let you select the `initialdir` `parent` `title`
 `filetypes` etc. See the Tk documentation for details:
 <https://www.tcl.tk/man/tcl8.6/TkCmd/getOpenFile.htm>
+
+
+
 
 #### 1.3.18. `tk/get-save-file`
 
 `tk/get-save-file` opens a dialog from which the user can select a file.
 Returns the file path in a string or "" if cancel is clicked.
 
-    
-    
     sash> (tk/get-save-file)
     "/home/peter/Software/r7rs-libs/rebottled-examples/pstk/newfile.txt"
-
-![http://peterlane.info/images/pstk-save-file-
-chooser.png](http://peterlane.info/images/pstk-save-file-chooser.png)
 
 Optional parameters let you select the `initialdir` `parent` `title`
 `filetypes` etc. See the Tk documentation for details:
 <https://www.tcl.tk/man/tcl8.6/TkCmd/getSaveFile.htm>
+
+
+
 
 #### 1.3.19. `tk/grab`
 
@@ -375,6 +359,9 @@ windows.
 
 See Tk documentation for details:
 <https://www.tcl.tk/man/tcl8.6/TkCmd/grab.htm>
+
+
+
 
 #### 1.3.20. `tk/grid`
 
@@ -385,8 +372,6 @@ can be used to arrange widgets by row and column.
 The following sample, taken from the example "example-temp-conversion.sps"
 illustrates some of the possibilities:
 
-    
-    
       (tk/grid celsius 'column: 2 'row: 1 'sticky: 'we 'padx: 5 'pady: 5) ; **< 1>**
       (tk/grid label 'column: 2 'row: 2 'sticky: 'we 'padx: 5 'pady: 5)   ; **< 2>**
       (tk/grid button 'column: 2 'row: 3 'sticky: 'we 'padx: 5 'pady: 5)
@@ -407,18 +392,16 @@ illustrates some of the possibilities:
 
 The final layout is:
 
-![http://peterlane.info/images/pstk-
-temp.png](http://peterlane.info/images/pstk-temp.png)
-
 For more of the many options, see:
 <https://www.tcl.tk/man/tcl8.6/TkCmd/grid.htm>
+
+
+
 
 #### 1.3.21. `tk/image`
 
 `tk/image` used to create, delete and query images.
 
-    
-    
     sash> (define im (tk/image 'create 'photo 'file: "doc/pstk-hello.png"))  ; **< 1>**
     #<unspecified>
     sash> (tk/pack (tk 'create-widget 'label 'image: im))                    ; **< 2>**
@@ -428,16 +411,19 @@ For more of the many options, see:
 
   2. Puts the image onto a label in the current frame. 
 
-![http://peterlane.info/images/pstk-
-image.png](http://peterlane.info/images/pstk-image.png)
-
 See the Tk documentation for more details:
 <https://www.tcl.tk/man/tcl8.6/TkCmd/image.htm>
+
+
+
 
 #### 1.3.22. `tk/lower`
 
 `tk/lower` lowers the given window below all its siblings in the current
 stacking order.
+
+
+
 
 #### 1.3.23. `tk/message-box`
 
@@ -446,44 +432,37 @@ straightforward or display a range of options and an icon.
 
 The simplest information box shows a given message, and adds an "OK" button:
 
-    
-    
     sash> (tk/message-box 'message: "Hello")
     "ok"                                        ; **< 1>**
 
   1. The function returns the string label of the clicked button. 
 
-![http://peterlane.info/images/pstk-
-box1.png](http://peterlane.info/images/pstk-box1.png)
-
 We can also add a title to the box, and select an icon from one of: `(error
 info question warning)` The type of box specifies the buttons. The choices
 are:
 
-  * "abortretryignore" - which displays three buttons, "abort" "retry" "ignore" 
+  * "abortretryignore" - which displays three buttons, "abort" "retry" "ignore"
 
-  * "ok" - which displays one button "ok" 
+  * "ok" - which displays one button "ok"
 
-  * "okcancel" - which displays two buttons "ok" or "cancel" 
+  * "okcancel" - which displays two buttons "ok" or "cancel"
 
-  * "retrycancel" 
+  * "retrycancel"
 
-  * "yesno" 
+  * "yesno"
 
-  * "yesnocancel" 
+  * "yesnocancel"
 
-    
-    
     sash> (tk/message-box 'title: "Error on opening file" 'icon: 'question 'message: "What to do now?" 'type: "abortretryignore")
     "ignore"
     sash> (tk/message-box 'title: "Error on opening file" 'icon: 'question 'message: "What to do now?" 'type: "abortretryignore")
     "abort"
 
-![http://peterlane.info/images/pstk-
-box2.png](http://peterlane.info/images/pstk-box2.png)
-
 For a full set of options, see the Tk documentation:
 <https://www.tcl.tk/man/tcl8.6/TkCmd/messageBox.htm>
+
+
+
 
 #### 1.3.24. `tk/option`
 
@@ -493,18 +472,22 @@ database.
 For details see the Tk documentation:
 <https://www.tcl.tk/man/tcl8.6/TkCmd/option.htm>
 
+
+
+
 #### 1.3.25. `tk/pack`
 
 `tk/pack` is the second of three techniques used to place widgets within a
 frame.
 
-    
-    
     (tk/pack command ...)
 
 The tk `pack` command takes a number of options to control the order and
 spacing of widgets placed within a frame. For the Tk documentation, see:
 <https://www.tcl.tk/man/tcl8.6/TkCmd/pack.htm>
+
+
+
 
 #### 1.3.26. `tk/place`
 
@@ -512,25 +495,35 @@ spacing of widgets placed within a frame. For the Tk documentation, see:
 frame. It provides a way to place widgets at specific coordinates. For the Tk
 documentation, see: <https://www.tcl.tk/man/tcl8.6/TkCmd/place.htm>
 
+
+
+
 #### 1.3.27. `tk/popup`
 
 `tk/popup` takes three arguments, a menu and x/y coordinates. The function
 pops up a menu at the given position.
+
+
+
 
 #### 1.3.28. `tk/raise`
 
 `tk/raise` raises the given window above its siblings in the current stacking
 order.
 
+
+
+
 #### 1.3.29. `tk/scaling`
 
 `tk/scaling` is used to get or set the number of pixels per point on a
 display. An optional `displayof` argument is used to specify a window.
 
-    
-    
     sash> (tk/scaling)
     "1.3333333333333333"
+
+
+
 
 #### 1.3.30. `tk/selection`
 
@@ -540,12 +533,15 @@ the mouse).
 In the following image, the text "get-save" was highlighted with the mouse,
 and returned by calling the function with the symbol `'get`:
 
-![http://peterlane.info/images/pstk-
-selection.png](http://peterlane.info/images/pstk-selection.png)
+
+
 
 #### 1.3.31. `tk/update`
 
 `tk/update` updates any pending events - "Use with extreme care" (Nils Holm)
+
+
+
 
 #### 1.3.32. `tk/useinputmethods`
 
@@ -553,16 +549,15 @@ selection.png](http://peterlane.info/images/pstk-selection.png)
 wiki](http://wiki.tcl.tk/8695), this is useful in some locales, such as
 Japanese or Korean, to use particular input devices. This only works under X.
 
-    
-    
     (tk/useinputmethods ['displayof: window] [boolean])
 
 For querying:
 
-    
-    
     sash> (tk/useinputmethods)
     "1"
+
+
+
 
 #### 1.3.33. `tk/wait`
 
@@ -574,22 +569,24 @@ for changes to variables.
 See the Tk documentation for details:
 <https://www.tcl.tk/man/tcl8.6/TkCmd/tkwait.htm>
 
+
+
+
 #### 1.3.34. `tk/windowingsystem`
 
 `tk/windowingsystem` returns a string naming the underlying window system.
 
-    
-    
     sash> (tk/windowingsystem)
     "x11"
+
+
+
 
 #### 1.3.35. `tk/winfo`
 
 `tk/winfo` is used to find out information about windows currently being
 managed by tk. For example, the screen width and height can be found using:
 
-    
-    
     sash> (tk/winfo 'screenwidth tk)
     "1920"                                    ; **< 1>**
     sash> (tk/winfo 'screenheight tk)
@@ -599,8 +596,6 @@ managed by tk. For example, the screen width and height can be found using:
 
 Similarly, information about a named window:
 
-    
-    
     sash> (tk/winfo 'x tk)
     "860"
     sash> (tk/winfo 'y tk)
@@ -609,29 +604,33 @@ Similarly, information about a named window:
 There are many kinds of information that may be queried. For a full list, see
 the Tk documentation: <https://www.tcl.tk/man/tcl8.6/TkCmd/winfo.htm>
 
+
+
+
 #### 1.3.36. `tk/wm`
 
 `tk/wm` is used to communicate with the Window Manager of the operating
 system. A simple use is to set the title of the top-most window:
 
-    
-    
       (tk/wm 'title tk "GMT Clock")
 
 More complex uses include fixing a window's size, specifying an operating-
 system-specific window type or setting an icon. For the Tk documentation, see:
 <https://www.tcl.tk/man/tcl8.6/TkCmd/wm.htm>
 
+
+
+
 #### 1.3.37. `ttk/available-themes`
 
 `ttk/available-themes` returns a list of the available themes.
 
-    
-    
     sash> (define tk (tk-start))
     #<unspecified>
     sash> (ttk/available-themes)
     ("clam" "alt" "default" "classic")
+
+
 
 #### 1.3.38. `ttk-map-widgets`
 
@@ -641,53 +640,61 @@ of themes as well as some additional widgets, such as a treeview.
 `ttk-map-widgets` is used to map native Tk widgets to their TTk equivalents.
 To use all the Tile widgets, call:
 
-    
-    
     (ttk-map-widgets 'all)
 
 (A value of `none` will not use any Tile widgets. Alternatively, list the
 specific widgets you want to map.)
 
+
+
+
 #### 1.3.39. `ttk/set-theme`
 
 `ttk/set-theme` is used to set the theme to one of those available.
 
-    
-    
     sash> (ttk/set-theme "classic")
     ""
+
+
+
 
 #### 1.3.40. `ttk/style`
 
 `ttk/style` is used to query or change the Tk style database. For the Tk
 documentation, see: <https://www.tcl.tk/man/tcl8.6/TkCmd/ttk_style.htm>
 
+
+
 ### 1.4. PS/Tk Functions
 
 These functions are included within the library but do not have direct Tk
 equivalents. (The function names start "tk-".)
 
+
+
+
 #### 1.4.1. `tk-end`
 
 `tk-end` is used to shutdown the Tk process, and effectively end the program.
 
-    
-    
     (tk-end)
+
+
+
 
 #### 1.4.2. `tk-eval`
 
 `tk-eval` evaluates a piece of TCL code, provided as a string.
 
-    
-    
     sash> (tk-eval "bell")
     ""
     sash> (tk-eval "puts 3")
-    
     An error occurred inside Tcl/Tk
      --> 3
     #<unspecified>
+
+
+
 
 #### 1.4.3. `tk-event-loop`
 
@@ -695,9 +702,10 @@ equivalents. (The function names start "tk-".)
 returned from `tk-start` as a parameter, and does not end until `tk-end` is
 called.
 
-
-
     (tk-event-loop tk)
+
+
+
 
 #### 1.4.4. `tk-start`
 
@@ -711,6 +719,9 @@ Linux, this program is "tclsh", but for easy distribution, you may wish to use
     (let ((tk (tk-start "tclkit"))) ...)  ; **< 1>**
 
   1. Starts the Tk program called "tclkit" and stores the result in the `tk` variable. 
+
+
+
 
 #### 1.4.5. `tk-var` `tk-get-var` `tk-set-var!`
 
@@ -738,45 +749,30 @@ For example:
 
   3. Retrieves the `cb-value` value to display the check button's state
 
+
+
+
 #### 1.4.6. `tk-wait-for-window`
 
 `tk-wait-for-window` waits until the given window is destroyed (such as a
 dialog being closed).
 
+
+
+
 #### 1.4.7. `tk-wait-until-visible`
 
 `tk-wait-until-visible` waits until the given window becomes visible.
+
+
+
 
 #### 1.4.8. `tk-with-lock`
 
 `tk-with-lock` is used to protect functions which are working with state in a
 multi-threaded environment.
 
-    
-    
     (tk 'create-widget 'button
         'command: (lambda ()
                     (tk-with-lock
                       (lambda () do-something-critical))))
-
-### 1.5. History
-
-The PSTK library has had a long history in the Scheme community and, in one
-form or another, is available for many Scheme implementations. The current
-file includes its history starting from an implementation of Chicken/Tk by
-Wolf-Dieter Busch from 2004 based on earlier code by Sven Hartrumpf from 1997.
-Nils Holm made the library portable, and so created PSTK. Ken Dickey created
-an R6RS version.
-
-Some links to versions for other Scheme implementations and documentation:
-
-  * <http://snow.iro.umontreal.ca/?tab=Packages>
-
-  * <https://sourceforge.net/projects/pstk/>
-
-  * <http://mirror.informatimago.com/scheme/www.t3x.org/pstk/pstk.html>
-
-* * *
-
-Last updated 2017-05-28 12:19:25 BST
-

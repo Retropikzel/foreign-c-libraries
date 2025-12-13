@@ -63,7 +63,7 @@
 ; Thank you!
 ;
 ; Change Log:
-; 2025-06-08 MAde to work with named pipes and foreign-c library
+; 2025-06-08 Made to work with named pipes and foreign-c library
 ; 2017-05-11 Optional argument to 'start' for input of wish/tclsh program name.
 ; 2017-05-11 Converted into an R7RS library with Chibi, Gauche and Sagittarius support.
 ; 2008-06-22 Added Larceny Scheme support.
@@ -100,10 +100,18 @@
 
 (define-library
   (retropikzel pstk)
+  (import (scheme base)
+          (scheme cxr)
+          (scheme read)
+          (scheme file)
+          (scheme write)
+          (foreign c)
+          (retropikzel named-pipes))
   (export tk-eval
           tk-id->widget
           tk-var
           tk-get-var
+          tk-set-var!
           tk-start
           tk-end
           tk-dispatch-event
@@ -152,12 +160,5 @@
           ttk/available-themes
           ttk/set-theme
           ttk/style)
-  (import (scheme base)
-          (scheme cxr)
-          (scheme read)
-          (scheme file)
-          (scheme write)
-          (foreign c)
-          (retropikzel named-pipes))
   (include "pstk.scm"))
 

@@ -28,8 +28,8 @@
                                        output-path
                                        " 1> "
                                        input-path
-                                       " 2> "
-                                       input-path
+                                       ;" 2> "
+                                       ;input-path
                                        " & ")))
     (create-pipe input-path 0777)
     (create-pipe output-path 0777)
@@ -38,8 +38,8 @@
           (open-output-pipe output-path))))
 
 (define *wish-program* "tclsh")
-(define *wish-debug-input* #f)
-(define *wish-debug-output* #f)
+(define *wish-debug-input* #t)
+(define *wish-debug-output* #t)
 
 (define *use-keywords?*
   (cond-expand (chicken #t)
@@ -200,7 +200,7 @@
                                  (improper-list->string x #t))
                           ")"))
           ((eof-object? x) "#<eof>")
-          (else "#<other>"))))
+          (else "#<unspecified>"))))
 
 (define string-translate
   (lambda (s map)
@@ -487,7 +487,7 @@
              (report-error (string-append
                              "An error occurred inside Tcl/Tk" nl
                              " --> " (form->string result)
-                             " " (wish-read-line wish-output)
+                             " " (form->string (wish-read-line wish-output))
                              )))
             ((eq? (car result) 'return)
              (cadr result))
