@@ -1,10 +1,11 @@
-(define-c-library libc
-                  '("stdlib.h" "stdio.h" "unistd.h")
-                  libc-name
-                  '((additional-versions ("0" "6"))))
+(define (temp-name)
+  (string-append "pstk-"
+                 (number->string (random-integer 1000))
+                 "-"
+                 (number->string (random-integer 1000))
+                 "-"
+                 (number->string (random-integer 1000))))
 
-(define-c-procedure c-tempnam libc 'tempnam 'pointer '(pointer pointer))
-(define-c-procedure c-system libc 'system 'int '(pointer))
 (define wish-display pipe-write-string)
 (define wish-read (lambda (pipe)
                     (let ((result (pipe-read pipe)))
@@ -17,11 +18,7 @@
 (define wish-flush (lambda () #t)) ; No need to do anything
 (define wish-read-line pipe-read-line)
 (define (run-program program)
-  (let* ((temp-prefix (string->c-utf8 "npcmd"))
-         (temp-name (lambda ()
-                      (c-utf8->string (c-tempnam (make-c-null)
-                                                 temp-prefix))))
-         (input-path (temp-name))
+  (let* ((input-path (temp-name))
          (output-path (temp-name))
          (shell-command (string-append program
                                        " < "
@@ -33,7 +30,7 @@
                                        " & ")))
     (create-pipe input-path 0777)
     (create-pipe output-path 0777)
-    (c-system (string->c-utf8 shell-command))
+    (system shell-command)
     (list (open-input-pipe input-path)
           (open-output-pipe output-path))))
 

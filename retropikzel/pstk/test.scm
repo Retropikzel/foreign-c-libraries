@@ -1,6 +1,3 @@
-(import (scheme base)
-        (scheme write)
-        (retropikzel pstk))
 
 (let ((tk (tk-start)))
   (tk/pack (tk 'create-widget

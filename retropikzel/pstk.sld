@@ -106,8 +106,9 @@
           (scheme file)
           (scheme write)
           (scheme process-context)
-          (foreign c)
-          (retropikzel named-pipes))
+          (retropikzel named-pipes)
+          (retropikzel system)
+          (srfi 27))
   (export tk-eval
           tk-id->widget
           tk-var
