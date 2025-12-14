@@ -1,10 +1,15 @@
+(random-source-randomize! default-random-source)
+
 (define (temp-name)
-  (string-append "pstk-"
+  (let ((file (string-append "/tmp/pstk-"
                  (number->string (random-integer 1000))
                  "-"
                  (number->string (random-integer 1000))
                  "-"
-                 (number->string (random-integer 1000))))
+                 (number->string (random-integer 1000)))))
+    (if (file-exists? file)
+      (temp-name)
+      file)))
 
 (define wish-display pipe-write-string)
 (define wish-read (lambda (pipe)
@@ -12,6 +17,10 @@
                       (if (eof-object? result)
                         result
                         (read (open-input-string result))))))
+
+(define (shell-command program output-path input-path)
+  (string-append program " < " output-path " 1> " input-path " & "))
+
 (define wish-newline
   (lambda (pipe)
     (pipe-write-char #\newline pipe)))
@@ -19,18 +28,10 @@
 (define wish-read-line pipe-read-line)
 (define (run-program program)
   (let* ((input-path (temp-name))
-         (output-path (temp-name))
-         (shell-command (string-append program
-                                       " < "
-                                       output-path
-                                       " 1> "
-                                       input-path
-                                       ;" 2> "
-                                       ;input-path
-                                       " & ")))
+         (output-path (temp-name)))
     (create-pipe input-path 0777)
     (create-pipe output-path 0777)
-    (system shell-command)
+    (system (shell-command program output-path input-path))
     (list (open-input-pipe input-path)
           (open-output-pipe output-path))))
 
