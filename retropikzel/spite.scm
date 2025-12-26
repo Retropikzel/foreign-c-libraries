@@ -6,6 +6,10 @@
 (define events (list))
 (define current-bitmap-font #f)
 (define current-line-size 1)
+(define draw-color-r 0)
+(define draw-color-g 0)
+(define draw-color-b 0)
+(define draw-color-a 255)
 (define-c-library sdl2*
                   '("SDL2/SDL.h")
                   "SDL2-2.0"
@@ -41,12 +45,27 @@
 (define-c-procedure sdl-create-texture-from-surface sdl2* 'SDL_CreateTextureFromSurface 'pointer '(pointer pointer))
 (define-c-procedure sdl-set-window-resizable sdl2* 'SDL_SetWindowResizable 'void '(pointer int))
 (define-c-procedure sdl-render-get-scale sdl2* 'SDL_RenderGetScale 'void '(pointer pointer pointer))
+(define-c-procedure sdl-render-geometry sdl2* 'SDL_RenderGeometry 'void '(pointer pointer pointer int pointer int))
 
 (define window* #f)
 (define renderer* #f)
 (define event* (make-c-bytevector 4000))
 (define draw-rect* (make-c-bytevector (* (c-type-size 'int) 4)))
 (define draw-slice-rect* (make-c-bytevector (* (c-type-size 'int) 4)))
+(define fill-triangle-vertex-size 128 #;(+ (* (c-type-size 'int) 6) (* (c-type-size 'float) 2)))
+(define fill-triangle-vertex1* (make-c-bytevector fill-triangle-vertex-size 0))
+(define fill-triangle-vertex2* (make-c-bytevector fill-triangle-vertex-size 0))
+(define fill-triangle-vertex3* (make-c-bytevector fill-triangle-vertex-size 0))
+(define fill-triangle-vertexes* (make-c-bytevector (* fill-triangle-vertex-size 3 0)))
+(c-bytevector-pointer-set! fill-triangle-vertexes*
+                           (* fill-triangle-vertex-size 0)
+                           fill-triangle-vertex1*)
+(c-bytevector-pointer-set! fill-triangle-vertexes*
+                           (* fill-triangle-vertex-size 1)
+                           fill-triangle-vertex2*)
+(c-bytevector-pointer-set! fill-triangle-vertexes*
+                           (* fill-triangle-vertex-size 2)
+                           fill-triangle-vertex3*)
 (define null* (make-c-null))
 
 (define update-procedure #f)
@@ -189,7 +208,27 @@
     (sdl-render-copy renderer* (image-pointer image) draw-slice-rect* draw-rect*)))
 
 (define (set-draw-color r g b . a)
-  (sdl-set-render-draw-color renderer* r g b (if (null? a) 255 (car a))))
+  (set! draw-color-r r)
+  (set! draw-color-g g)
+  (set! draw-color-b b)
+  (set! draw-color-a (if (null? a) 255 a))
+
+  (c-bytevector-sint-set! fill-triangle-vertex1* (* (c-type-size 'int) 2) draw-color-r (native-endianness) (c-type-size 'int))
+  (c-bytevector-sint-set! fill-triangle-vertex1* (* (c-type-size 'int) 3) draw-color-g (native-endianness) (c-type-size 'int))
+  (c-bytevector-sint-set! fill-triangle-vertex1* (* (c-type-size 'int) 4) draw-color-b (native-endianness) (c-type-size 'int))
+  (c-bytevector-sint-set! fill-triangle-vertex1* (* (c-type-size 'int) 5) draw-color-b (native-endianness) (c-type-size 'int))
+
+  (c-bytevector-sint-set! fill-triangle-vertex2* (* (c-type-size 'int) 2) draw-color-r (native-endianness) (c-type-size 'int))
+  (c-bytevector-sint-set! fill-triangle-vertex2* (* (c-type-size 'int) 3) draw-color-g (native-endianness) (c-type-size 'int))
+  (c-bytevector-sint-set! fill-triangle-vertex2* (* (c-type-size 'int) 4) draw-color-b (native-endianness) (c-type-size 'int))
+  (c-bytevector-sint-set! fill-triangle-vertex2* (* (c-type-size 'int) 5) draw-color-b (native-endianness) (c-type-size 'int))
+
+  (c-bytevector-sint-set! fill-triangle-vertex3* (* (c-type-size 'int) 2) draw-color-r (native-endianness) (c-type-size 'int))
+  (c-bytevector-sint-set! fill-triangle-vertex3* (* (c-type-size 'int) 3) draw-color-g (native-endianness) (c-type-size 'int))
+  (c-bytevector-sint-set! fill-triangle-vertex3* (* (c-type-size 'int) 4) draw-color-b (native-endianness) (c-type-size 'int))
+  (c-bytevector-sint-set! fill-triangle-vertex3* (* (c-type-size 'int) 5) draw-color-b (native-endianness) (c-type-size 'int))
+
+  (sdl-set-render-draw-color renderer* r g b draw-color-a))
 
 (define (set-line-size size)
   (set! current-line-size size)
@@ -222,6 +261,24 @@
   (c-bytevector-sint-set! draw-rect* (* (c-type-size 'int) 2) width (native-endianness) (c-type-size 'int))
   (c-bytevector-sint-set! draw-rect* (* (c-type-size 'int) 3) height (native-endianness) (c-type-size 'int))
   (sdl-render-fill-rect renderer* draw-rect*))
+
+(define (draw-triangle x1 y1 x2 y2 x3 y3)
+  (draw-line x1 y1 x2 y2)
+  (draw-line x2 y2 x3 y3)
+  (draw-line x3 y3 x1 y1))
+
+;; FIXME
+#;(define (fill-triangle x1 y1 x2 y2 x3 y3)
+  (c-bytevector-sint-set! fill-triangle-vertex1* (* (c-type-size 'int) 0) x1 (native-endianness) (c-type-size 'int))
+  (c-bytevector-sint-set! fill-triangle-vertex1* (* (c-type-size 'int) 1) y1 (native-endianness) (c-type-size 'int))
+
+  (c-bytevector-sint-set! fill-triangle-vertex2* (* (c-type-size 'int) 0) x2 (native-endianness) (c-type-size 'int))
+  (c-bytevector-sint-set! fill-triangle-vertex2* (* (c-type-size 'int) 1) y2 (native-endianness) (c-type-size 'int))
+
+  (c-bytevector-sint-set! fill-triangle-vertex3* (* (c-type-size 'int) 0) x3 (native-endianness) (c-type-size 'int))
+  (c-bytevector-sint-set! fill-triangle-vertex3* (* (c-type-size 'int) 1) y3 (native-endianness) (c-type-size 'int))
+
+  (sdl-render-geometry renderer* (make-c-null) fill-triangle-vertexes* 3 (make-c-null) 0))
 
 (define (spite-option-set! name . value)
   (cond
@@ -365,22 +422,3 @@
           (set! offset-x (+ offset-x (bitmap-font-get 'character-draw-width current-bitmap-font))))
         (make-bitmap-text text current-bitmap-font)))))
 
-(define (draw-polygon points)
-  (let* ((first-point #f)
-         (previous-point #f))
-    (for-each
-      (lambda (point)
-        (when (not first-point)
-          (set! first-point point)
-          (set! previous-point first-point))
-        (draw-line (car previous-point)
-                   (cdr previous-point)
-                   (car point)
-                   (cdr point))
-        (set! previous-point point))
-      points)
-    (when first-point
-      (draw-line (car previous-point)
-                 (cdr previous-point)
-                 (car first-point)
-                 (cdr first-point)))))

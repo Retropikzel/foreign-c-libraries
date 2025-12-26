@@ -24,8 +24,9 @@
           draw-line
           draw-rectangle
           fill-rectangle
-          draw-circle
-          draw-polygon
+          draw-triangle
+          ;; FIXME
+          ;fill-triangle
 
           push-event
           clear-events!
