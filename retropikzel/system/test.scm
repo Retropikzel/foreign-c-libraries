@@ -15,7 +15,7 @@
 
 (define text (with-input-from-file testfile (lambda () (read-all ""))))
 
-(test-assert (string=? text "Hello"))
+(test-assert (string=? text "Hello\n"))
 
 (define exit-code2 (system "no-such-command 2> /dev/null"))
 
