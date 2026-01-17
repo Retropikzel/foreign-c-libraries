@@ -74,20 +74,20 @@
                                                  O_WRONLY+O_NONBLOCK+O_CREAT
                                                  O_WRONLY+O_CREAT))))))
 
-(define pipe-read-u8-buffer (make-c-bytevector (c-type-size 'uint8)))
+(define pipe-read-u8-buffer (make-c-bytevector (c-type-size 'u8)))
 (define pipe-read-u8
   (lambda (pipe)
     (when (not (input-pipe? pipe))
       (error "Can only read from input-pipe" pipe))
     (let* ((read-count (c-read (input-file-descriptor pipe)
                                pipe-read-u8-buffer
-                               (c-type-size 'uint8)))
+                               (c-type-size 'u8)))
            (byte (if (> read-count 0)
                    (c-bytevector-u8-ref pipe-read-u8-buffer 0)
                    (eof-object))))
       byte)))
 
-(define pipe-write-u8-buffer (make-c-bytevector (c-type-size 'uint8)))
+(define pipe-write-u8-buffer (make-c-bytevector (c-type-size 'u8)))
 (define pipe-write-u8
   (lambda (byte pipe)
     (when (not (output-pipe? pipe))
