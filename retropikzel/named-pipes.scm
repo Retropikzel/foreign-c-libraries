@@ -83,7 +83,7 @@
                                pipe-read-u8-buffer
                                (c-type-size 'u8)))
            (byte (if (> read-count 0)
-                   (c-bytevector-u8-ref pipe-read-u8-buffer 0)
+                   (c-bytevector-ref pipe-read-u8-buffer 'u8 0)
                    (eof-object))))
       byte)))
 
@@ -92,7 +92,7 @@
   (lambda (byte pipe)
     (when (not (output-pipe? pipe))
       (error "Can only write to output-pipe" pipe))
-    (c-bytevector-u8-set! pipe-write-u8-buffer 0 byte)
+    (c-bytevector-set! pipe-write-u8-buffer 'u8 0 byte)
     (c-write (output-file-descriptor pipe) pipe-write-u8-buffer 1)))
 
 (define pipe-read-char-buffer (make-c-bytevector (c-type-size 'char)))
@@ -104,7 +104,7 @@
                                pipe-read-char-buffer
                                (c-type-size 'char)))
            (char (if (> read-count 0)
-                   (c-bytevector-char-ref pipe-read-char-buffer 0)
+                   (c-bytevector-ref pipe-read-char-buffer 'char 0)
                    (eof-object))))
       char)))
 
@@ -113,7 +113,7 @@
   (lambda (char pipe)
     (when (not (output-pipe? pipe))
       (error "Can only write to output-pipe" pipe))
-    (c-bytevector-char-set! pipe-write-char-buffer 0 char)
+    (c-bytevector-set! pipe-write-char-buffer 'char 0 char)
     (c-write (output-file-descriptor pipe)
              pipe-write-char-buffer
              (c-type-size 'char))))
