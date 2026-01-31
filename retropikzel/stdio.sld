@@ -4,7 +4,7 @@
           (scheme write)
           (foreign c))
   (export fopen
-          ;fclose
+          fclose
           ;feof
           ;ferror
           ;fgetc
