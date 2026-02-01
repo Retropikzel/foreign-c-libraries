@@ -1,12 +1,11 @@
-(random-source-randomize! default-random-source)
-
 (define (temp-name)
+  (random-source-randomize! default-random-source)
   (let ((file (string-append "/tmp/pstk-"
-                 (number->string (random-integer 1000))
-                 "-"
-                 (number->string (random-integer 1000))
-                 "-"
-                 (number->string (random-integer 1000)))))
+                             (number->string (random-integer 1000))
+                             "-"
+                             (number->string (random-integer 1000))
+                             "-"
+                             (number->string (random-integer 1000)))))
     (if (file-exists? file)
       (temp-name)
       file)))
@@ -41,8 +40,14 @@
 
 (define *use-keywords?* #t)
 
-(define (keyword? x) #f)        ;; TODO: handle keywords?
-(define (keyword->string x) x)
+(define (keyword? x)
+  (cond-expand
+    (chicken (chicken-keyword? x))
+    (else (error "Keywords not supported on this implementation"))))
+(define (keyword->string x)
+  (cond-expand
+    (chicken (chicken-keyword->string x))
+    (else (error "Keywords not supported on this implementation"))))
 
 (define nl (string #\newline))
 
@@ -193,6 +198,7 @@
                                  (improper-list->string x #t))
                           ")"))
           ((eof-object? x) "#<eof>")
+          ((keyword? x) (keyword->string x))
           (else "#<unspecified>"))))
 
 (define string-translate

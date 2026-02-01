@@ -162,5 +162,8 @@
           ttk/available-themes
           ttk/set-theme
           ttk/style)
+  (cond-expand
+    (chicken (import (prefix (chicken keyword) chicken-)))
+    (else))
   (include "pstk.scm"))
 

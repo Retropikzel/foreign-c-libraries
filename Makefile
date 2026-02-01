@@ -35,14 +35,15 @@ uninstall:
 init-venv: build
 	rm -rf venv
 	scheme-venv ${SCHEME} ${RNRS} venv
-	cp ${TESTFILE} venv/test.scm
-	cp ${TESTFILE} venv/test.sps
-	sed -i 's/srfi 64/srfi :64/' venv/test.sps
+	echo "(import (scheme base) (scheme write) (scheme read) (scheme char) (scheme file) (scheme process-context) (srfi 64) (retropikzel ${LIBRARY}))" > venv/test.scm
+	echo "(import (rnrs) (srfi :64) (retropikzel ${LIBRARY}))" > venv/test.sps
+	cat ${TESTFILE} >> venv/test.scm
+	cat ${TESTFILE} >> venv/test.sps
 	cp -r ../foreign-c/foreign venv/lib
 	cp -r retropikzel venv/lib/
 	if [ "${RNRS}" = "r7rs" ]; then ./venv/bin/snow-chibi install --always-yes srfi.64; fi
-	if [ "${RNRS}" = "r7rs" ]; then ./venv/bin/snow-chibi install --always-yes ${PKG}; fi
-	./venv/bin/akku install akku-r7rs chez-srfi
+	if [ "${RNRS}" = "r7rs" ]; then ./venv/bin/snow-chibi install ${PKG}; fi
+	if [ "${RNRS}" = "r6rs" ]; then ./venv/bin/akku install akku-r7rs chez-srfi; fi
 
 run-test: init-venv
 	if [ "${RNRS}" = "r6rs" ]; then ./venv/bin/scheme-compile venv/test.sps; fi

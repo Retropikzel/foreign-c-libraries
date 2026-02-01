@@ -1,7 +1,3 @@
-(import (scheme base)
-        (scheme file)
-        (scheme write)
-        (retropikzel named-pipes))
 
 (define pipe-path "/tmp/named-pipes-test")
 (when (file-exists? pipe-path) (delete-file pipe-path))
