@@ -1,6 +1,7 @@
 .SILENT: build install test-r6rs test-r6rs-docker test-r7rs test-r7rs-docker clean
 .PHONY: test-r6rs test-r7rs example.scm example.sps
 SCHEME=chibi
+RNRS=r7rs
 LIBRARY=system
 EXAMPLE=editor
 EXAMPLE_FILE=retropikzel/${LIBRARY}/examples/${EXAMPLE}
@@ -30,6 +31,23 @@ install:
 
 uninstall:
 	-snow-chibi remove --impls=${SCHEME} ${PKG}
+
+init-venv: build
+	rm -rf venv
+	scheme-venv ${SCHEME} ${RNRS} venv
+	cp ${TESTFILE} venv/test.scm
+	cp ${TESTFILE} venv/test.sps
+	sed -i 's/srfi 64/srfi :64/' venv/test.sps
+	cp -r ../foreign-c/foreign venv/lib
+	cp -r retropikzel venv/lib/
+	if [ "${RNRS}" = "r7rs" ]; then ./venv/bin/snow-chibi install --always-yes srfi.64; fi
+	if [ "${RNRS}" = "r7rs" ]; then ./venv/bin/snow-chibi install --always-yes ${PKG}; fi
+	./venv/bin/akku install akku-r7rs chez-srfi
+
+run-test: init-venv
+	if [ "${RNRS}" = "r6rs" ]; then ./venv/bin/scheme-compile venv/test.sps; fi
+	if [ "${RNRS}" = "r7rs" ]; then ./venv/bin/scheme-compile venv/test.scm; fi
+	./venv/test
 
 test-r7rs:
 	echo "(import (scheme base) (scheme write) (scheme file) (scheme process-context) (foreign c) (retropikzel ${LIBRARY}) (srfi 64))" > test-r7rs.scm

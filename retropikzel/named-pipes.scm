@@ -8,7 +8,7 @@
 
 ;(define-c-procedure c-system libc-stdlib 'system 'int '(pointer))
 (define-c-procedure c-mkfifo libc-stdlib 'mkfifo 'int '(pointer int))
-(define-c-procedure c-open libc-stdlib 'open 'int '(pointer int))
+(define-c-procedure c-open libc-stdlib 'open 'int '(pointer int int))
 (define-c-procedure c-read libc-stdlib 'read 'int '(int pointer int))
 (define-c-procedure c-write libc-stdlib 'write 'int '(int pointer int))
 (define-c-procedure c-close libc-stdlib 'close 'int '(int))
@@ -32,6 +32,8 @@
 (define O_RDONLY+O_NONBLOCK+O_CREAT 2112)
 (define O_WRONLY+O_CREAT 65)
 (define O_WRONLY+O_NONBLOCK+O_CREAT 2113)
+
+(define S_IRUSR-S_IWUSR 384)
 
 (define handle-c-errors
   (lambda (msg return-code)
@@ -61,7 +63,8 @@
                                       (c-open (string->c-utf8 path)
                                               (if (null? block?)
                                                 O_RDONLY+O_NONBLOCK+O_CREAT
-                                                O_RDONLY+O_CREAT))))))
+                                                O_RDONLY+O_CREAT)
+                                              S_IRUSR-S_IWUSR)))))
 
 (define open-output-pipe
   (lambda (path . block?)
@@ -72,7 +75,8 @@
                                        (c-open (string->c-utf8 path)
                                                (if (null? block?)
                                                  O_WRONLY+O_NONBLOCK+O_CREAT
-                                                 O_WRONLY+O_CREAT))))))
+                                                 O_WRONLY+O_CREAT)
+                                               S_IRUSR-S_IWUSR)))))
 
 (define pipe-read-u8-buffer (make-c-bytevector (c-type-size 'u8)))
 (define pipe-read-u8
