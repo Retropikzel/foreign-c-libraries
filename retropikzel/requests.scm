@@ -113,11 +113,7 @@
   (let* ((pointer-size (c-type-size 'long))
          (pointer (make-c-bytevector (c-type-size 'long))))
     (curl-easy-getinfo handle CURLINFO-RESPONSE-CODE pointer)
-    (let ((code (c-bytevector-ref pointer
-                                  'sint
-                                  0
-                                  (native-endianness)
-                                  pointer-size)))
+    (let ((code (c-bytevector-ref pointer 'int 0)))
       (c-free pointer)
       code)))
 

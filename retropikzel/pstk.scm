@@ -20,34 +20,41 @@
 (define (shell-command program output-path input-path)
   (string-append program " < " output-path " 1> " input-path " & "))
 
-(define wish-newline
-  (lambda (pipe)
-    (pipe-write-char #\newline pipe)))
+(define wish-newline (lambda (pipe) (pipe-write-char #\newline pipe)))
 (define wish-flush (lambda () #t)) ; No need to do anything
 (define wish-read-line pipe-read-line)
+(define input-pipe-path (temp-name))
+(define output-pipe-path (temp-name))
+(define input-pipe #f)
+(define output-pipe #f)
 (define (run-program program)
-  (let* ((input-path (temp-name))
-         (output-path (temp-name)))
-    (create-pipe input-path 0777)
-    (create-pipe output-path 0777)
-    (system (shell-command program output-path input-path))
-    (list (open-input-pipe input-path)
-          (open-output-pipe output-path))))
+    (create-pipe input-pipe-path 0777)
+    (create-pipe output-pipe-path 0777)
+    (system (shell-command program output-pipe-path input-pipe-path))
+    (set! input-pipe (open-input-pipe input-pipe-path))
+    (set! output-pipe (open-output-pipe output-pipe-path))
+    (list input-pipe output-pipe))
 
 (define *wish-program* "tclsh")
 (define *wish-debug-input* (if (get-environment-variable "PSTK_DEBUG") #t #f))
 (define *wish-debug-output* (if (get-environment-variable "PSTK_DEBUG") #t #f))
 
-(define *use-keywords?* #t)
+(define *use-keywords?*
+  (cond-expand
+    (stklos #t)
+    (else #f)))
 
-(define (keyword? x)
+(define (%keyword? x)
   (cond-expand
-    (chicken (chicken-keyword? x))
-    (else (error "Keywords not supported on this implementation"))))
-(define (keyword->string x)
+    (kawa (keyword? x))
+    (srfi-88 (keyword? x))
+    (else (error "Keywords not supported" x))))
+
+(define (%keyword->string x)
   (cond-expand
-    (chicken (chicken-keyword->string x))
-    (else (error "Keywords not supported on this implementation"))))
+    (kawa (keyword->string x))
+    (stklos (keyword->string x))
+    (else (error "Keywords not supported" x))))
 
 (define nl (string #\newline))
 
@@ -151,16 +158,11 @@
   (lambda (x)
     (newline)
     (display x)
-    (newline)
-    ; (bottom x)
-    ))
-
-
+    (newline)))
 
 (define option?
   (lambda (x)
-    (or (and *use-keywords?*
-             (keyword? x))
+    (or (and *use-keywords?* (%keyword? x))
         (and (symbol? x)
              (let* ((s (symbol->string x))
                     (n (string-length s)))
@@ -168,12 +170,11 @@
 
 (define make-option-string
   (lambda (x)
-    (if (and *use-keywords?*
-             (keyword? x))
-      (string-append " -" (keyword->string x))
-      (let ((s (symbol->string x)))
-        (string-append " -"
-                       (substring s 0 (- (string-length s) 1)))))))
+    (if (and *use-keywords?* (%keyword? x))
+      (string-append " -" (%keyword->string x))
+      (let* ((s (symbol->string x))
+             (option (string-append " -" (substring s 0 (- (string-length s) 1)))))
+        option))))
 
 (define improper-list->string
   (lambda (a first)
@@ -198,7 +199,7 @@
                                  (improper-list->string x #t))
                           ")"))
           ((eof-object? x) "#<eof>")
-          ((keyword? x) (keyword->string x))
+          ((and *use-keywords?* (%keyword? x)) (%keyword->string x))
           (else "#<unspecified>"))))
 
 (define string-translate
@@ -430,9 +431,7 @@
 
 (define scheme-arglist->tk-argstring
   (lambda (args)
-    (apply string-append
-           (map scheme-arg->tk-arg
-                args))))
+    (apply string-append (map scheme-arg->tk-arg args))))
 
 (define make-wish-func
   (lambda (tkname)
@@ -558,7 +557,11 @@
 (define tk-end
   (lambda ()
     (set! tk-is-running #f)
-    (wish "after 200 exit")))
+    (wish "after 200 exit")
+    (close-pipe input-pipe)
+    (close-pipe output-pipe)
+    (delete-file input-pipe-path)
+    (delete-file output-pipe-path)))
 
 (define tk-dispatch-event
   (lambda ()

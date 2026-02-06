@@ -1,7 +1,3 @@
-(import (scheme base)
-        (scheme write)
-        (scheme process-context)
-        (retropikzel requests))
 
 (define response (request 'GET
                           "http://echo-http-requests.appspot.com/echo"

@@ -163,7 +163,8 @@
           ttk/set-theme
           ttk/style)
   (cond-expand
-    (chicken (import (prefix (chicken keyword) chicken-)))
+    (kawa (import (only (kawa base) keyword? keyword->string)))
+    (srfi-88 (import (srfi 88)))
     (else))
   (include "pstk.scm"))
 

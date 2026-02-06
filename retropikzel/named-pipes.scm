@@ -39,6 +39,9 @@
   (lambda (msg return-code)
     (when (and (number? return-code)
                (< return-code 0))
+      (display "HERE: ")
+      (write return-code)
+      (newline)
       (c-perror (string->c-utf8 msg))
       (error msg return-code))
     return-code))
@@ -48,11 +51,13 @@
     (let* ((path* (string->c-utf8 path))
            (octal-mode (string->number (string-append "#o"
                                                       (number->string mode)))))
-      (handle-c-errors (string-append "open-output-pipe mkfifo"
-                                      " "
+      (handle-c-errors (string-append "open-output-pipe mkfifo: "
+                                      " path: "
                                       path
-                                      " "
-                                      (number->string mode))
+                                      ", mode: "
+                                      (number->string mode)
+                                      ", octal-mode: "
+                                      (number->string octal-mode))
                        (c-mkfifo path* octal-mode)))))
 
 (define open-input-pipe
