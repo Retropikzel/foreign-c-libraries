@@ -13,7 +13,7 @@
 (define CURLINFO-COOKIELIST 4194332)
 (define randomized? #f)
 
-(define-c-library libc '("stdlib.h" "stdio.h" "time.h") libc-name '((additional-versions ("6"))))
+(define-c-library libc '("stdlib.h" "stdio.h" "time.h") #f '())
 (define-c-procedure c-fopen libc 'fopen 'pointer '(pointer pointer))
 (define-c-procedure c-fclose libc 'fclose 'int '(pointer))
 (define-c-procedure c-time libc 'time 'int '(pointer))
@@ -49,7 +49,7 @@
 
 (define (random-to max)
   (when (not randomized?)
-    (c-srand (c-time (make-c-null)))
+    (c-srand (c-time (c-bytevector-null)))
     (set! randomized? #t))
   (modulo (c-rand) max))
 
@@ -80,7 +80,7 @@
 (define handle-errors
   (lambda (result)
     (when (not (= result 0))
-      (error (c-utf8->string (curl-easy-strerror result))))
+      (error (c-bytevector->string (curl-easy-strerror result))))
     result))
 
 (define handle (curl-easy-init))
@@ -114,21 +114,21 @@
          (pointer (make-c-bytevector (c-type-size 'long))))
     (curl-easy-getinfo handle CURLINFO-RESPONSE-CODE pointer)
     (let ((code (c-bytevector-ref pointer 'int 0)))
-      (c-free pointer)
+      (c-bytevector-free pointer)
       code)))
 
 (define (set-body handle body)
-  (curl-easy-setopt-pointer handle CURLOPT-POSTFIELDS (string->c-utf8 body))
+  (curl-easy-setopt-pointer handle CURLOPT-POSTFIELDS (string->c-bytevector body))
   (curl-easy-setopt-int handle CURLOPT-POSTFIELDSIZE (string-length body)))
 
 (define (set-headers handle headers)
-  (let ((headers-slist (make-c-null)))
+  (let ((headers-slist (c-bytevector-null)))
     (for-each
       (lambda (header)
         (set! headers-slist
           (curl-slist-append
             headers-slist
-            (string->c-utf8 (string-append (if (symbol? (car header))
+            (string->c-bytevector (string-append (if (symbol? (car header))
                                              (symbol->string (car header))
                                              (car header))
                                            ":"
@@ -143,14 +143,14 @@
                                               CURLHE-HEADER
                                               0
                                               previous-header-struct)))
-    (if (c-null? header-struct)
+    (if (c-bytevector-null? header-struct)
       result
       (let* ((name
                (string->symbol
                  (string-downcase
-                   (c-utf8->string
+                   (c-bytevector->string
                      (c-bytevector-ref header-struct 'pointer 0)))))
-             (value (c-utf8->string (c-bytevector-ref header-struct
+             (value (c-bytevector->string (c-bytevector-ref header-struct
                                                       'pointer
                                                       (c-type-size 'pointer)))))
         (get-headers handle header-struct (append result
@@ -183,7 +183,7 @@
                            (cdr header))
                          "; ")))
       cookies)
-    (curl-easy-setopt-pointer handle CURLOPT-COOKIE (string->c-utf8 cookies-string))))
+    (curl-easy-setopt-pointer handle CURLOPT-COOKIE (string->c-bytevector cookies-string))))
 
 (define request
   (lambda (method url . options)
@@ -194,20 +194,20 @@
            (tmp-file-path (if download-path
                             (cdr download-path)
                             (random-temp-file)))
-           (tmp-file (c-fopen (string->c-utf8 tmp-file-path)
-                              (string->c-utf8 "w"))))
+           (tmp-file (c-fopen (string->c-bytevector tmp-file-path)
+                              (string->c-bytevector "w"))))
       (curl-easy-setopt-pointer handle
                                 CURLOPT-CUSTOMREQUEST
-                                (string->c-utf8
+                                (string->c-bytevector
                                   (string-upcase (symbol->string method))))
       (curl-easy-setopt-pointer handle CURLOPT-WRITEDATA tmp-file)
-      (curl-easy-setopt-pointer handle CURLOPT-URL (string->c-utf8 url))
+      (curl-easy-setopt-pointer handle CURLOPT-URL (string->c-bytevector url))
       (when headers (set-headers handle (cdr headers)))
       (when cookies (set-cookies handle (cdr cookies)))
       (when body (set-body handle (cdr body)))
       (handle-errors (curl-easy-perform handle))
       (c-fclose tmp-file)
-      (let* ((headers (get-headers handle (make-c-null) (list)))
+      (let* ((headers (get-headers handle (c-bytevector-null) (list)))
              (response (make-response (slurp-bytes tmp-file-path)
                                       ;(get-cookies handle)
                                       headers

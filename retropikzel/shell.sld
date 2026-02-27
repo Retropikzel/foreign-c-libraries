@@ -5,6 +5,7 @@
           (scheme read)
           (scheme file)
           (foreign c)
+          (retropikzel system)
           (retropikzel named-pipes))
   (export shell
           shell->list

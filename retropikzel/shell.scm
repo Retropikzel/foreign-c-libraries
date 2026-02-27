@@ -1,17 +1,13 @@
-(define-c-library libc
-                  '("stdlib.h" "stdio.h" "unistd.h")
-                  libc-name
-                  '((additional-versions ("0" "6"))))
-
+(define-c-library libc '("stdlib.h" "stdio.h" "unistd.h") #f '())
 (define-c-procedure c-tempnam libc 'tempnam 'pointer '(pointer pointer))
-(define-c-procedure c-system libc 'system 'int '(pointer))
 
 (define previous-exit-code #f)
 
 (define (shell cmd)
-  (let* ((temp-prefix (string->c-utf8 "npcmd"))
+  (when (not (string? cmd)) (error "shell: cmd must be string" cmd))
+  (let* ((temp-prefix (string->c-bytevector "npcmd"))
          (temp-name (lambda ()
-                      (c-utf8->string (c-tempnam (make-c-null)
+                      (c-bytevector->string (c-tempnam (c-bytevector-null)
                                                  temp-prefix))))
          (input-path (temp-name))
          (shell-command (string-append cmd
@@ -21,7 +17,7 @@
                                        input-path
                                        " & ")))
     (create-pipe input-path 0777)
-    (set! previous-exit-code (c-system (string->c-utf8 shell-command)))
+    (set! previous-exit-code (system shell-command))
     (pipe-read-string 64000 (open-input-pipe input-path #t))))
 
 (define (lines->list port result)

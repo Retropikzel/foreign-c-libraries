@@ -1,9 +1,3 @@
-(import (scheme base)
-        (scheme write)
-        (scheme file)
-        (scheme process-context)
-        (retropikzel shell)
-        (srfi 64))
 
 (test-begin "shell")
 
