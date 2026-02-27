@@ -52,7 +52,7 @@
     (draw-rectangle player-x player-y 64 64)
     (fill-rectangle (+ player-x 32) (+ player-y 32) 16 16)
     (draw-triangle 350 350 380 380 330 380)
-    (fill-triangle 450 450 480 480 430 480)
+    ;(fill-triangle 450 450 480 480 430 480)
     ))
 
 (spite-start update draw)

@@ -51,7 +51,7 @@ init-venv: build
 
 run-test: init-venv
 	if [ "${RNRS}" = "r6rs" ]; then ./venv/bin/scheme-compile venv/test.sps; fi
-	if [ "${RNRS}" = "r7rs" ]; then CSC_OPTIONS="-L -lcurl" ./venv/bin/scheme-compile venv/test.scm; fi
+	if [ "${RNRS}" = "r7rs" ]; then CSC_OPTIONS="-L -lcurl -L -lSDL2 -L -lSDL2_image" ./venv/bin/scheme-compile venv/test.scm; fi
 	./venv/test
 
 test-r7rs:
