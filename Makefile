@@ -35,7 +35,7 @@ init-venv: build
 	rm -rf venv
 	scheme-venv ${SCHEME} ${RNRS} venv
 	echo "(import (scheme base) (scheme write) (scheme read) (scheme char) (scheme file) (scheme process-context) (srfi 64) (retropikzel ${LIBRARY}))" > venv/test.scm
-	printf "#!r6rs\n(import (rnrs) (srfi :64) (retropikzel ${LIBRARY}))" > venv/test.sps
+	printf "#!r6rs\n(import (except (rnrs) remove) (srfi :64) (retropikzel ${LIBRARY}))" > venv/test.sps
 	cat ${TESTFILE} >> venv/test.scm
 	cat ${TESTFILE} >> venv/test.sps
 	if [ "${RNRS}" = "r6rs" ]; then if [ -d ../foreign-c ]; then cp -r ../foreign-c/foreign venv/lib/; fi; fi
@@ -73,7 +73,7 @@ example-r7rs: example.scm
 	./example
 
 test-r6rs:
-	echo "(import (rnrs) (foreign c) (retropikzel ${LIBRARY}) (srfi :64))" > test-r6rs.sps
+	echo "(import (except (rnrs) remove) (foreign c) (retropikzel ${LIBRARY}) (srfi :64))" > test-r6rs.sps
 	cat retropikzel/${LIBRARY}/test.scm >> test-r6rs.sps
 	akku install chez-srfi akku-r7rs
 	COMPILE_R7RS=${SCHEME} timeout 60 compile-scheme -I .akku/lib -o test-r6rs test-r6rs.sps
