@@ -1,10 +1,7 @@
 ;; TODO output-pipe and input-pipe types
 ;; TODO Check on writing that given pipe is output pipe
 ;; TODO Check on reading that given pipe is input pipe
-(define-c-library libc-stdlib
-                  '("stdlib.h" "errno.h" "fcntl.h")
-                  libc-name
-                  '((additional-versions ("0" "6"))))
+(define-c-library libc-stdlib '("stdlib.h" "errno.h" "fcntl.h") #f '())
 
 ;(define-c-procedure c-system libc-stdlib 'system 'int '(pointer))
 (define-c-procedure c-mkfifo libc-stdlib 'mkfifo 'int '(pointer int))
@@ -42,13 +39,13 @@
       (display "HERE: ")
       (write return-code)
       (newline)
-      (c-perror (string->c-utf8 msg))
+      (c-perror (string->c-bytevector msg))
       (error msg return-code))
     return-code))
 
 (define create-pipe
   (lambda (path mode)
-    (let* ((path* (string->c-utf8 path))
+    (let* ((path* (string->c-bytevector path))
            (octal-mode (string->number (string-append "#o"
                                                       (number->string mode)))))
       (handle-c-errors (string-append "open-output-pipe mkfifo: "
@@ -65,7 +62,7 @@
     (make-input-pipe path
                      (handle-c-errors (string-append "open-input-pipe open"
                                                      "(Note that: A process can open a FIFO in nonblocking mode. In this case, opening for read-only succeeds even if no one has opened on the write side yet and opening for write-only fails with ENXIO (no such device or address) unless the other end has already been opened.)")
-                                      (c-open (string->c-utf8 path)
+                                      (c-open (string->c-bytevector path)
                                               (if (null? block?)
                                                 O_RDONLY+O_NONBLOCK+O_CREAT
                                                 O_RDONLY+O_CREAT)
@@ -77,7 +74,7 @@
                       (handle-c-errors (string-append "open-output-pipe open"
                                                       " "
                                                       "(Note that: A process can open a FIFO in nonblocking mode. In this case, opening for read-only succeeds even if no one has opened on the write side yet and opening for write-only fails with ENXIO (no such device or address) unless the other end has already been opened.)")
-                                       (c-open (string->c-utf8 path)
+                                       (c-open (string->c-bytevector path)
                                                (if (null? block?)
                                                  O_WRONLY+O_NONBLOCK+O_CREAT
                                                  O_WRONLY+O_CREAT)
@@ -133,11 +130,11 @@
       (error "Can only read from input-pipe" pipe))
     (let* ((buffer (make-c-bytevector (* (c-type-size 'char) count)))
            (read-count (c-read (input-file-descriptor pipe) buffer count))
-           (text (string-copy (c-utf8->string buffer))))
+           (text (string-copy (c-bytevector->string buffer))))
       (display "text: ")
       (display text)
       (newline)
-      (c-free buffer)
+      (c-bytevector-free buffer)
       (if (> read-count 0) text (eof-object)))))
 
 (define pipe-read-string
@@ -146,8 +143,8 @@
       (error "Can only read from input-pipe" pipe))
     (let* ((buffer (make-c-bytevector (* (c-type-size 'char) count)))
            (read-count (c-read (input-file-descriptor pipe) buffer count))
-           (text (c-utf8->string buffer)))
-      (c-free buffer)
+           (text (c-bytevector->string buffer)))
+      (c-bytevector-free buffer)
       (if (> read-count 0) text (eof-object)))))
 
 (define pipe-write-string
@@ -155,9 +152,9 @@
     (when (not (output-pipe? pipe))
       (error "Can only write to output-pipe" pipe))
     (let ((count (string-length text))
-          (text-pointer (string->c-utf8 text)))
+          (text-pointer (string->c-bytevector text)))
       (c-write (output-file-descriptor pipe) text-pointer count)
-      (c-free text-pointer))))
+      (c-bytevector-free text-pointer))))
 
 (define pipe-read-line
   (lambda (pipe)
