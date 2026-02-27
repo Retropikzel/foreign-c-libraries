@@ -1,10 +1,7 @@
-(define-c-library libc
-                  '("stdlib.h" "stdio.h" "unistd.h")
-                  libc-name
-                  '((additional-versions ("0" "6"))))
+(define-c-library libc '("stdlib.h" "stdio.h" "unistd.h") #f '())
 (define-c-procedure c-tempnam libc 'tempnam 'pointer '(pointer pointer))
-(define temp-prefix (string->c-utf8 "scmgtk"))
-(define (temp-name) (c-utf8->string (c-tempnam (make-c-null) temp-prefix)))
+(define temp-prefix (string->c-bytevector "scmgtk"))
+(define (temp-name) (c-bytevector->string (c-tempnam (c-bytevector-null) temp-prefix)))
 (define gtk-server-display pipe-write-string)
 (define gtk-server-newline (lambda (pipe) (pipe-write-char #\newline pipe)))
 (define (gtk-server-read-line pipe)
