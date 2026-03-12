@@ -15,8 +15,6 @@ RUN make
 RUN make install
 WORKDIR /build/compile-scheme
 RUN make build-gauche
-WORKDIR /build
-RUN git clone https://codeberg.org/foreign-c/foreign-c.git --depth=2
 
 ARG SCHEME=chibi
 ARG IMAGE=${SCHEME}:head
@@ -35,12 +33,9 @@ WORKDIR /build/akku
 RUN bash install.sh
 ENV PATH=/root/.local/bin:${PATH}
 RUN akku update
-WORKDIR /build/foreign-c
 RUN timeout 30 snow-chibi install --impls=${SCHEME} --always-yes "(srfi 64)" || true
 RUN timeout 30 snow-chibi install --impls=${SCHEME} --always-yes "(foreign c)" || true
-RUN make SCHEME=${SCHEME} build install
 WORKDIR /workdir
-RUN cp -r /build/foreign-c/foreign .
 COPY Makefile .
 COPY retropikzel retropikzel/
 

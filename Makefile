@@ -21,7 +21,6 @@ endif
 all: build
 
 build: retropikzel/${LIBRARY}/LICENSE retropikzel/${LIBRARY}/VERSION
-	rm -rf *.tgz
 	echo "<pre>$$(cat retropikzel/${LIBRARY}/README.md)</pre>" > ${README}
 	snow-chibi package --version=${VERSION} --authors=${AUTHOR} --doc=${README} --description="${DESCRIPTION}" ${LIBRARY_FILE}
 
@@ -31,9 +30,9 @@ install:
 uninstall:
 	-snow-chibi remove --impls=${SCHEME} ${PKG}
 
-init-venv: build
+run-test-venv: build
 	rm -rf venv
-	scheme-venv ${SCHEME} ${RNRS} venv
+	scheme-venv ${SCHEME} venv
 	echo "(import (scheme base) (scheme write) (scheme read) (scheme char) (scheme file) (scheme process-context) (srfi 64) (retropikzel ${LIBRARY}))" > venv/test.scm
 	printf "#!r6rs\n(import (except (rnrs) remove) (srfi :64) (retropikzel ${LIBRARY}))" > venv/test.sps
 	cat ${TESTFILE} >> venv/test.scm
@@ -48,11 +47,30 @@ init-venv: build
 	if [ "${SCHEME}" = "chicken" ]; then ./venv/bin/snow-chibi install --always-yes srfi.64; fi
 	if [ "${SCHEME}-${RNRS}" = "mosh-r7rs" ]; then ./venv/bin/snow-chibi install --always-yes srfi.64; fi
 	if [ "${RNRS}" = "r7rs" ]; then ./venv/bin/snow-chibi install ${PKG}; fi
-
-run-test: init-venv
 	if [ "${RNRS}" = "r6rs" ]; then ./venv/bin/scheme-compile venv/test.sps; fi
 	if [ "${RNRS}" = "r7rs" ]; then CSC_OPTIONS="-L -lcurl -L -lSDL2 -L -lSDL2_image" ./venv/bin/scheme-compile venv/test.scm; fi
 	./venv/test
+
+run-test-system: build
+	rm -rf tmp
+	mkdir -p tmp
+	printf "#!r6rs\n(import (except (rnrs) remove) (srfi :64) (retropikzel ${LIBRARY}))" > tmp/test.sps
+	cat ${TESTFILE} >> tmp/test.sps
+	echo "(import (scheme base) (scheme write) (scheme read) (scheme char) (scheme file) (scheme process-context) (srfi 64) (retropikzel ${LIBRARY}))" > tmp/test.scm
+	cat ${TESTFILE} >> tmp/test.scm
+	if [ "${RNRS}" = "r6rs" ]; then cp -r retropikzel tmp/lib/; fi
+	if [ "${RNRS}" = "r6rs" ]; then snow-chibi install --impls=generic --install-source-dir=tmp/lib --install-library-dir=tmp/lib --always-yes foreign.c; fi
+	if [ "${RNRS}" = "r6rs" ]; then cd tmp && akku install akku-r7rs chez-srfi; fi
+	if [ "${RNRS}" = "r7rs" ]; then snow-chibi install --impls=${SCHEME} --always-yes --skip-tests?=1 srfi.64; fi
+	if [ "${RNRS}" = "r7rs" ]; then snow-chibi install --impls=${SCHEME} --always-yes --skip-tests?=1 foreign.c; fi
+	if [ "${RNRS}" = "r7rs" ]; then snow-chibi install --impls=${SCHEME} --always-yes ${PKG}; fi
+	if [ "${RNRS}" = "r6rs" ]; then cd tmp && COMPILE_R7RS=${SCHEME} compile-scheme -o test test.sps; fi
+	if [ "${RNRS}" = "r7rs" ]; then cd tmp && CSC_OPTIONS="-L -lcurl -L -lSDL2 -L -lSDL2_image" COMPILE_R7RS=${SCHEME} compile-scheme -o test test.scm; fi
+	cd tmp && ./test
+
+run-test-docker:
+	docker build --build-arg IMAGE=${DOCKERIMG} --build-arg SCHEME=${SCHEME} --tag=foreign-c-library-test-${SCHEME} -f Dockerfile.test .
+	docker run -v "${PWD}/logs:/workdir/logs" -w /workdir -t foreign-c-library-test-${SCHEME} sh -c "make SCHEME=${SCHEME} LIBRARY=${LIBRARY} RNRS=${RNRS} run-test-system"
 
 test-r7rs:
 	echo "(import (scheme base) (scheme write) (scheme file) (scheme process-context) (foreign c) (retropikzel ${LIBRARY}) (srfi 64))" > test-r7rs.scm

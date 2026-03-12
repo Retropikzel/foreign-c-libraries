@@ -3,7 +3,7 @@
 (define exit? #f)
 (define scale-x 1.0)
 (define scale-y 1.0)
-(define events (list))
+(define events '())
 (define current-bitmap-font #f)
 (define current-line-size 1)
 (define draw-color-r 0)
@@ -51,39 +51,29 @@
 (define event* (make-c-bytevector 4000))
 (define draw-rect* (make-c-bytevector (* (c-type-size 'int) 4)))
 (define draw-slice-rect* (make-c-bytevector (* (c-type-size 'int) 4)))
-(define fill-triangle-vertex-size 128) ;(+ (* (c-type-size 'int) 6) (* (c-type-size 'float) 2))
+(define fill-triangle-vertex-size (+ (* (c-type-size 'int) 6) (* (c-type-size 'float) 2)))
 (define fill-triangle-vertex1* (make-c-bytevector fill-triangle-vertex-size 0))
 (define fill-triangle-vertex2* (make-c-bytevector fill-triangle-vertex-size 0))
 (define fill-triangle-vertex3* (make-c-bytevector fill-triangle-vertex-size 0))
 (define fill-triangle-vertexes* (make-c-bytevector (* fill-triangle-vertex-size 3 0)))
-(c-bytevector-set! fill-triangle-vertexes*
-                   'pointer
-                   (* fill-triangle-vertex-size 0)
-                   fill-triangle-vertex1*)
-(c-bytevector-set! fill-triangle-vertexes*
-                   'pointer
-                   (* fill-triangle-vertex-size 1)
-                   fill-triangle-vertex2*)
-(c-bytevector-set! fill-triangle-vertexes*
-                   'pointer
-                   (* fill-triangle-vertex-size 2)
-                   fill-triangle-vertex3*)
-
-(define update-procedure #f)
-(define draw-procedure #f)
+(c-bytevector-set!
+  fill-triangle-vertexes* 'pointer (* fill-triangle-vertex-size 0) fill-triangle-vertex1*)
+(c-bytevector-set!
+  fill-triangle-vertexes* 'pointer (* fill-triangle-vertex-size 1) fill-triangle-vertex2*)
+(c-bytevector-set!
+  fill-triangle-vertexes* 'pointer (* fill-triangle-vertex-size 2) fill-triangle-vertex3*)
 
 (define main-loop-start-time 0)
 (define delta-time 0)
-(define main-loop
-  (lambda ()
-    (set! main-loop-start-time (current-jiffy))
-    (sdl2-events-get)
-    (update-procedure delta-time (poll-events!))
-    (render-clear)
-    (draw-procedure)
-    (render-present)
-    (set! delta-time (/ (- (current-jiffy) main-loop-start-time) (jiffies-per-second)))
-    (unless exit? (main-loop))))
+(define (main-loop update-procedure draw-procedure)
+  (set! main-loop-start-time (current-jiffy))
+  (sdl2-events-get)
+  (update-procedure delta-time (poll-events!))
+  (render-clear)
+  (draw-procedure)
+  (render-present)
+  (set! delta-time (/ (- (current-jiffy) main-loop-start-time) (jiffies-per-second)))
+  (unless exit? (main-loop update-procedure draw-procedure)))
 
 (define sdl2-event->spite-event
   (lambda (event)
@@ -304,13 +294,11 @@
             (cons 'y (c-bytevector-ref y 'float 0))))))
 
 (define spite-start
-  (lambda (new-update-procedure new-draw-procedure)
-    (set! update-procedure new-update-procedure)
-    (set! draw-procedure new-draw-procedure)
+  (lambda (update-procedure draw-procedure)
     (cond
       ((not started?)
        (set! started? #t)
-       (main-loop)))))
+       (main-loop update-procedure draw-procedure)))))
 
 (define spite-init
   (lambda (title width height)

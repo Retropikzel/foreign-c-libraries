@@ -20,40 +20,28 @@ pipeline {
 
     stages {
         stage('Tests') {
-            parallel {
-                stage('R6RS') {
-                    steps {
-                        script {
-                            params.LIBRARIES.split().each { LIBRARY ->
-                            stage("${LIBRARY}") {
-                                    parallel params.R6RS_SCHEMES.split().collectEntries { SCHEME ->
-                                        [(SCHEME): {
-                                            def IMG="${SCHEME}:head"
-                                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                                                sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} test-r6rs-docker"
-                                            }
-                                        }]
-                                    }
+            stage('R6RS') {
+                steps {
+                    script {
+                        params.LIBRARIES.split().each { LIBRARY ->
+                        stage("${LIBRARY}") {
+                            params.R6RS_SCHEMES.split().each { SCHEME ->
+                                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                    sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} RNRS=r6rs run-test-docker"
                                 }
                             }
                         }
                     }
                 }
-                stage('R7RS') {
-                    steps {
-                        script {
-                            params.LIBRARIES.split().each { LIBRARY ->
-                                stage("${LIBRARY}") {
-                                    parallel params.R7RS_SCHEMES.split().collectEntries() { SCHEME ->
-                                        [(SCHEME): {
-                                            def IMG="${SCHEME}:head"
-                                            if("${SCHEME}" == "chicken") {
-                                                IMG="${SCHEME}:5"
-                                            }
-                                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                                                sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} test-r7rs-docker"
-                                            }
-                                        }]
+            }
+            stage('R7RS') {
+                steps {
+                    script {
+                        params.LIBRARIES.split().each { LIBRARY ->
+                            stage("${LIBRARY}") {
+                                params.R7RS_SCHEMESsplit().each { SCHEME ->
+                                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                        sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} RNRS=r7rs run-test-docker"
                                     }
                                 }
                             }

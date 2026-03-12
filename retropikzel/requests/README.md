@@ -1,7 +1,4 @@
-# requests
-
-Scheme library to make https requests. Built with
-[foreign c](https://sr.ht/~retropikzel/foreign-c/) and libcurl.
+Scheme library to make https requests. Built with (foreign c) and libcurl.
 
 [Repository](https://git.sr.ht/~retropikzel/foreign-c-requests)
 
@@ -9,14 +6,10 @@ Scheme library to make https requests. Built with
 
 [Jenkins](https://jenkins.scheme.org/job/foreign_c/job/foreign-c-requests/)
 
-
-
 ## Caveats
 
 - Not yet working on Mosh
 - No cookie reading support yet
-
-
 
 ## Dependencies
 
