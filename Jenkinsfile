@@ -24,10 +24,11 @@ pipeline {
                 steps {
                     script {
                         params.LIBRARIES.split().each { LIBRARY ->
-                        stage("${LIBRARY}") {
-                            params.R6RS_SCHEMES.split().each { SCHEME ->
-                                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                                    sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} RNRS=r6rs run-test-docker"
+                            stage("${LIBRARY}") {
+                                params.R6RS_SCHEMES.split().each { SCHEME ->
+                                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                        sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} RNRS=r6rs run-test-docker"
+                                    }
                                 }
                             }
                         }
