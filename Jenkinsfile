@@ -21,7 +21,7 @@ pipeline {
     stages {
         stage('Docker image warmup') {
             steps {
-                sh "docker build -f Dockerfile.test"
+                sh "docker build -f Dockerfile.test ."
             }
         }
 
