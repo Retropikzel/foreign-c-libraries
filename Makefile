@@ -30,10 +30,13 @@ build: retropikzel/${LIBRARY}/LICENSE retropikzel/${LIBRARY}/VERSION
 	echo "<pre>$$(cat retropikzel/${LIBRARY}/README.md)</pre>" > ${README}
 	snow-chibi package --always-yes --version=${VERSION} --authors=${AUTHOR} --doc=${README} --description="${DESCRIPTION}" ${LIBRARY_FILE}
 
+index:
+	snow-chibi index ${PKG}
+
 install:
 	snow-chibi install --impls=${SCHEME} --always-yes ${PKG}
 
-test: build
+test: index build
 	rm -rf .tmp
 	mkdir -p .tmp
 	# R6RS testfiles
@@ -45,7 +48,8 @@ test: build
 	# Tests
 	cd .tmp && ${SNOW} srfi.64
 	cd .tmp && ${SNOW} retropikzel.ctrf
-	cd .tmp && ${SNOW} ../${PKG}
+	cd .tmp && ${SNOW} foreign.c
+	cd .tmp && ${SNOW} retropikzel.${LIBRARY}
 	cd .tmp && akku install akku-r7rs 2> /dev/null
 	cd .tmp && CSC_OPTIONS="-L -lcurl -L -lSDL2 -L -lSDL2_image" COMPILE_R7RS=${SCHEME} compile-r7rs ${LIB_PATHS} -o test test.${SFX}
 	cd .tmp && ./test
