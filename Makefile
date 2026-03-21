@@ -47,7 +47,6 @@ test: index build
 	cat ${TESTFILE} >> .tmp/test.scm
 	# Tests
 	cd .tmp && ${SNOW} srfi.64
-	cd .tmp && ${SNOW} retropikzel.ctrf
 	cd .tmp && ${SNOW} foreign.c
 	cd .tmp && ${SNOW} retropikzel.${LIBRARY}
 	cd .tmp && akku install akku-r7rs 2> /dev/null
