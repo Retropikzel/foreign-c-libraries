@@ -1,7 +1,4 @@
-(define-c-library libc
-                  '("stdlib.h")
-                  libc-name
-                  '((additional-versions ("6"))))
+(define-c-library libc '("stdlib.h") #f '())
 (define-c-library c-gi
                   '("girepository/girepository.h")
                   "girepository-2.0"
