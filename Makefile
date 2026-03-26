@@ -42,6 +42,7 @@ install:
 testfiles: build
 	rm -rf .tmp
 	mkdir -p .tmp
+	cp ${PKG} .tmp/
 	# R6RS testfiles
 	printf "#!r6rs\n(import (except (rnrs) remove) (srfi :64) (retropikzel ${LIBRARY}))" > .tmp/test.sps
 	cat ${TESTFILE} >> .tmp/test.sps
