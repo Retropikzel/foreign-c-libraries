@@ -19,13 +19,7 @@ pipeline {
     }
 
     stages {
-        stage('Docker image warmup') {
-            steps {
-                sh "docker build -f Dockerfile.test ."
-            }
-        }
-
-        stage('R6RS') {
+        stage('Test R6RS Debian') {
             steps {
                 script {
                     params.LIBRARIES.split().each { LIBRARY ->
@@ -40,7 +34,7 @@ pipeline {
                 }
             }
         }
-        stage('R7RS') {
+        stage('Test R7RS Debian') {
             steps {
                 script {
                     params.LIBRARIES.split().each { LIBRARY ->
