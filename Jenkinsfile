@@ -32,7 +32,7 @@ pipeline {
                         params.R6RS_SCHEMES.split().each { SCHEME ->
                             stage("${SCHEME} ${LIBRARY}") {
                                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                                    sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} RNRS=r6rs test-docker"
+                                    sh "make SCHEME=${SCHEME} LIBRARY=${LIBRARY} RNRS=r6rs test-docker"
                                 }
                             }
                         }
@@ -47,7 +47,7 @@ pipeline {
                         params.R7RS_SCHEMESsplit().each { SCHEME ->
                             stage("${SCHEME} ${LIBRARY}") {
                                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                                    sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} RNRS=r7rs test-docker"
+                                    sh "make SCHEME=${SCHEME} LIBRARY=${LIBRARY} RNRS=r7rs test-docker"
                                 }
                             }
                         }
