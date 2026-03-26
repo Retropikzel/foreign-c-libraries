@@ -28,15 +28,18 @@ all: build
 
 build: retropikzel/${LIBRARY}/LICENSE retropikzel/${LIBRARY}/VERSION
 	echo "<pre>$$(cat retropikzel/${LIBRARY}/README.md)</pre>" > ${README}
-	snow-chibi package --always-yes --version=${VERSION} --authors=${AUTHOR} --doc=${README} --description="${DESCRIPTION}" ${LIBRARY_FILE}
-
-index:
-	snow-chibi index ${PKG}
+	snow-chibi package \
+		--always-yes \
+		--version=${VERSION} \
+		--authors=${AUTHOR} \
+		--doc=${README} \
+		--description="${DESCRIPTION}" \
+		${LIBRARY_FILE}
 
 install:
 	snow-chibi install --impls=${SCHEME} --always-yes ${PKG}
 
-test: index build
+testfiles: build
 	rm -rf .tmp
 	mkdir -p .tmp
 	# R6RS testfiles
@@ -45,17 +48,13 @@ test: index build
 	# R7RS testfiles
 	echo "(import (scheme base) (scheme write) (scheme read) (scheme char) (scheme file) (scheme process-context) (srfi 64) (retropikzel ${LIBRARY}))" > .tmp/test.scm
 	cat ${TESTFILE} >> .tmp/test.scm
-	# Tests
-	cd .tmp && ${SNOW} srfi.64
-	cd .tmp && ${SNOW} foreign.c
-	cd .tmp && ${SNOW} retropikzel.${LIBRARY}
-	cd .tmp && akku install akku-r7rs 2> /dev/null
-	cd .tmp && CSC_OPTIONS="-L -lcurl -L -lSDL2 -L -lSDL2_image" COMPILE_R7RS=${SCHEME} compile-r7rs ${LIB_PATHS} -o test test.${SFX}
-	cd .tmp && ./test
 
-test-docker:
-	docker build --build-arg SCHEME=${SCHEME} --build-arg IMAGE=${IMAGE} --tag=foreign-c-library-test-${SCHEME} -f Dockerfile.test .
-	docker run -v "${PWD}/logs:/workdir/logs" -w /workdir -t foreign-c-library-test-${SCHEME} sh -c "make SCHEME=${SCHEME} LIBRARY=${LIBRARY} RNRS=${RNRS} test"
+test: testfiles
+	cd .tmp && COMPILE_R7RS=${SCHEME} compile-r7rs -o test-program test.${SFX}
+	cd .tmp && ./test-program
+
+test-docker: testfiles
+	cd .tmp && SNOW_PACKAGES="srfi.64 foreign.c" COMPILE_R7RS=${SCHEME} test-r7rs -o test-program test.${SFX} ${PKG}
 
 clean:
 	git clean -X -f
