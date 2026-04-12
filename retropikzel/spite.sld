@@ -7,6 +7,11 @@
           (scheme file)
           (scheme load)
           (scheme time)
+          (c2foreign-c sdl2 init)
+          (c2foreign-c sdl2 video)
+          (c2foreign-c sdl2 render)
+          (c2foreign-c sdl2 events)
+          (c2foreign-c sdl2 keyboard)
           (foreign c))
   (export spite-init
           spite-start

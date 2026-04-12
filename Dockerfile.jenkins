@@ -1,8 +1,5 @@
-FROM debian:trixie-slim
-RUN apt-get update && apt-get install -y \
-    make ca-certificates git docker.io gauche time mit-scheme
-WORKDIR /cache
-RUN git clone https://codeberg.org/retropikzel/compile-scheme.git --depth=1
-WORKDIR /cache/compile-scheme
-RUN make build-gauche
-RUN make install
+FROM alpine
+RUN apk add make docker git
+RUN git clone https://codeberg.org/retropikzel/test-r7rs.git --depth=1
+RUN cd test-r7rs && ./configure && make && make install
+COPY --from=schemers/chibi:alpine-head /usr/local /usr/local

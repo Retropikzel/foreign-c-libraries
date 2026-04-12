@@ -3,19 +3,13 @@
 (define exit? #f)
 (define scale-x 1.0)
 (define scale-y 1.0)
-(define events (list))
+(define events '())
 (define current-bitmap-font #f)
 (define current-line-size 1)
 (define draw-color-r 0)
 (define draw-color-g 0)
 (define draw-color-b 0)
 (define draw-color-a 255)
-(define-c-library sdl2*
-                  '("SDL2/SDL.h")
-                  "SDL2-2.0"
-                  `((additional-paths ("retropikzel/spite"
-                                       "snow/retropikzel/spite"))
-                    (additional-versions ("0"))))
 (define-c-library sdl2-image*
                   '("SDL2/SDL_image.h")
                   "SDL2_image-2.0"
@@ -23,67 +17,36 @@
                                        "snow/retropikzel/spite"))
                     (additional-versions ("0"))))
 
-(define-c-procedure sdl-init sdl2* 'SDL_Init 'int '(int))
-(define-c-procedure sdl-get-window-flags sdl2* 'SDL_GetWindowFlags 'int '(pointer))
-(define-c-procedure sdl-create-window sdl2* 'SDL_CreateWindow 'pointer '(pointer int int int int int))
-(define-c-procedure sdl-create-renderer sdl2* 'SDL_CreateRenderer 'pointer '(pointer int int))
-(define-c-procedure sdl-render-setlogial-size sdl2* 'SDL_RenderSetLogicalSize 'int '(pointer int int))
-(define-c-procedure sdl-render-set-integer-scale sdl2* 'SDL_RenderSetIntegerScale 'int '(pointer int))
-(define-c-procedure sdl-set-render-draw-color sdl2* 'SDL_SetRenderDrawColor 'int '(pointer int int int int))
-(define-c-procedure sdl-render-clear sdl2* 'SDL_RenderClear 'int '(pointer))
-(define-c-procedure sdl-render-present sdl2* 'SDL_RenderPresent 'void '(pointer))
-(define-c-procedure sdl-get-key-from-scancode sdl2* 'SDL_GetKeyFromScancode 'int '(int))
-(define-c-procedure sdl-get-key-name sdl2* 'SDL_GetKeyName 'pointer '(int))
-(define-c-procedure sdl-poll-event sdl2* 'SDL_PollEvent 'int '(pointer))
 (define-c-procedure sdl-img-load-texture sdl2-image* 'IMG_LoadTexture 'pointer '(pointer pointer))
-(define-c-procedure sdl-render-copy sdl2* 'SDL_RenderCopy 'int '(pointer pointer pointer pointer))
-(define-c-procedure sdl-render-draw-line sdl2* 'SDL_RenderDrawLine 'int '(pointer int int int int))
-(define-c-procedure sdl-render-draw-rect sdl2* 'SDL_RenderDrawRect 'int '(pointer pointer))
-(define-c-procedure sdl-render-fill-rect sdl2* 'SDL_RenderFillRect 'int '(pointer pointer))
-(define-c-procedure sdl-render-set-scale sdl2* 'SDL_RenderSetScale 'int '(pointer float float))
-(define-c-procedure sdl-create-texture-from-surface sdl2* 'SDL_CreateTextureFromSurface 'pointer '(pointer pointer))
-(define-c-procedure sdl-set-window-resizable sdl2* 'SDL_SetWindowResizable 'void '(pointer int))
-(define-c-procedure sdl-render-get-scale sdl2* 'SDL_RenderGetScale 'void '(pointer pointer pointer))
-(define-c-procedure sdl-render-geometry sdl2* 'SDL_RenderGeometry 'void '(pointer pointer pointer int pointer int))
 
 (define window* #f)
 (define renderer* #f)
 (define event* (make-c-bytevector 4000))
 (define draw-rect* (make-c-bytevector (* (c-type-size 'int) 4)))
 (define draw-slice-rect* (make-c-bytevector (* (c-type-size 'int) 4)))
-(define fill-triangle-vertex-size 128) ;(+ (* (c-type-size 'int) 6) (* (c-type-size 'float) 2))
+(define fill-triangle-vertex-size (+ (* (c-type-size 'int) 6) (* (c-type-size 'float) 2)))
 (define fill-triangle-vertex1* (make-c-bytevector fill-triangle-vertex-size 0))
 (define fill-triangle-vertex2* (make-c-bytevector fill-triangle-vertex-size 0))
 (define fill-triangle-vertex3* (make-c-bytevector fill-triangle-vertex-size 0))
 (define fill-triangle-vertexes* (make-c-bytevector (* fill-triangle-vertex-size 3 0)))
-(c-bytevector-set! fill-triangle-vertexes*
-                   'pointer
-                   (* fill-triangle-vertex-size 0)
-                   fill-triangle-vertex1*)
-(c-bytevector-set! fill-triangle-vertexes*
-                   'pointer
-                   (* fill-triangle-vertex-size 1)
-                   fill-triangle-vertex2*)
-(c-bytevector-set! fill-triangle-vertexes*
-                   'pointer
-                   (* fill-triangle-vertex-size 2)
-                   fill-triangle-vertex3*)
-
-(define update-procedure #f)
-(define draw-procedure #f)
+(c-bytevector-set!
+  fill-triangle-vertexes* 'pointer (* fill-triangle-vertex-size 0) fill-triangle-vertex1*)
+(c-bytevector-set!
+  fill-triangle-vertexes* 'pointer (* fill-triangle-vertex-size 1) fill-triangle-vertex2*)
+(c-bytevector-set!
+  fill-triangle-vertexes* 'pointer (* fill-triangle-vertex-size 2) fill-triangle-vertex3*)
 
 (define main-loop-start-time 0)
 (define delta-time 0)
-(define main-loop
-  (lambda ()
-    (set! main-loop-start-time (current-jiffy))
-    (sdl2-events-get)
-    (update-procedure delta-time (poll-events!))
-    (render-clear)
-    (draw-procedure)
-    (render-present)
-    (set! delta-time (/ (- (current-jiffy) main-loop-start-time) (jiffies-per-second)))
-    (unless exit? (main-loop))))
+(define (main-loop update-procedure draw-procedure)
+  (set! main-loop-start-time (current-jiffy))
+  (sdl2-events-get)
+  (update-procedure delta-time (poll-events!))
+  (render-clear)
+  (draw-procedure)
+  (render-present)
+  (set! delta-time (/ (- (current-jiffy) main-loop-start-time) (jiffies-per-second)))
+  (unless exit? (main-loop update-procedure draw-procedure)))
 
 (define sdl2-event->spite-event
   (lambda (event)
@@ -99,8 +62,8 @@
                                         'int
                                         (+ (* (c-type-size 'int) 3)
                                            (* (c-type-size 'u8) 4))))
-            (keycode (sdl-get-key-from-scancode scancode))
-            (key (c-bytevector->string (sdl-get-key-name keycode)))
+            (keycode (SDL_GetKeyFromScancode scancode))
+            (key (c-bytevector->string (SDL_GetKeyName keycode)))
             (repeat? (= (c-bytevector-ref
                           event
                           'u8
@@ -152,7 +115,7 @@
 
 (define sdl2-events-get
   (lambda ()
-    (let ((poll-result (sdl-poll-event event*)))
+    (let ((poll-result (SDL_PollEvent event*)))
       (cond
         ((= poll-result 1)
          (let ((event (sdl2-event->spite-event event*)))
@@ -163,12 +126,12 @@
 
 (define render-clear
   (lambda ()
-    (sdl-set-render-draw-color renderer* 255 255 255 255)
-    (sdl-render-clear renderer*)))
+    (SDL_SetRenderDrawColor renderer* 255 255 255 255)
+    (SDL_RenderClear renderer*)))
 
 (define render-present
   (lambda ()
-    (sdl-render-present renderer*)))
+    (SDL_RenderPresent renderer*)))
 
 (define-record-type image
   (make-image pointer path)
@@ -189,7 +152,7 @@
     (c-bytevector-set! draw-rect* 'int (* (c-type-size 'int) 1) y)
     (c-bytevector-set! draw-rect* 'int (* (c-type-size 'int) 2) width)
     (c-bytevector-set! draw-rect* 'int (* (c-type-size 'int) 3) height)
-    (sdl-render-copy renderer* (image-pointer image) (c-bytevector-null) draw-rect*)))
+    (SDL_RenderCopy renderer* (image-pointer image) (c-bytevector-null) draw-rect*)))
 
 (define draw-image-slice
   (lambda (image x y width height slice-x slice-y slice-width slice-height)
@@ -201,7 +164,7 @@
     (c-bytevector-set! draw-slice-rect* 'int (* (c-type-size 'int) 1) slice-y)
     (c-bytevector-set! draw-slice-rect* 'int (* (c-type-size 'int) 2) slice-width)
     (c-bytevector-set! draw-slice-rect* 'int (* (c-type-size 'int) 3) slice-height)
-    (sdl-render-copy renderer* (image-pointer image) draw-slice-rect* draw-rect*)))
+    (SDL_RenderCopy renderer* (image-pointer image) draw-slice-rect* draw-rect*)))
 
 (define (set-draw-color r g b . a)
   (set! draw-color-r r)
@@ -224,21 +187,21 @@
   (c-bytevector-set! fill-triangle-vertex3* 'int (* (c-type-size 'int) 4) draw-color-b)
   (c-bytevector-set! fill-triangle-vertex3* 'int (* (c-type-size 'int) 5) draw-color-b)
 
-  (sdl-set-render-draw-color renderer* r g b draw-color-a))
+  (SDL_SetRenderDrawColor renderer* r g b draw-color-a))
 
 (define (set-line-size size)
   (set! current-line-size size)
-  (sdl-render-set-scale renderer* (inexact (/ size 1)) (inexact (/ size 1))))
+  (SDL_RenderSetScale renderer* (inexact (/ size 1)) (inexact (/ size 1))))
 
 (define (draw-point x y)
-  (sdl-render-draw-line renderer*
+  (SDL_RenderDrawLine renderer*
                         (exact (round (/ x current-line-size)))
                         (exact (round (/ y current-line-size)))
                         (exact (round (/ x current-line-size)))
                         (exact (round (/ y current-line-size)))))
 
 (define (draw-line x1 y1 x2 y2)
-  (sdl-render-draw-line renderer*
+  (SDL_RenderDrawLine renderer*
                         (exact (round (/ x1 current-line-size)))
                         (exact (round (/ y1 current-line-size)))
                         (exact (round (/ x2 current-line-size)))
@@ -249,14 +212,14 @@
   (c-bytevector-set! draw-rect* 'int (* (c-type-size 'int) 1) y)
   (c-bytevector-set! draw-rect* 'int (* (c-type-size 'int) 2) width)
   (c-bytevector-set! draw-rect* 'int (* (c-type-size 'int) 3) height)
-  (sdl-render-draw-rect renderer* draw-rect*))
+  (SDL_RenderDrawRect renderer* draw-rect*))
 
 (define (fill-rectangle x y width height)
   (c-bytevector-set! draw-rect* 'int (* (c-type-size 'int) 0) x)
   (c-bytevector-set! draw-rect* 'int (* (c-type-size 'int) 1) y)
   (c-bytevector-set! draw-rect* 'int (* (c-type-size 'int) 2) width)
   (c-bytevector-set! draw-rect* 'int (* (c-type-size 'int) 3) height)
-  (sdl-render-fill-rect renderer* draw-rect*))
+  (SDL_RenderFillRect renderer* draw-rect*))
 
 (define (draw-triangle x1 y1 x2 y2 x3 y3)
   (draw-line x1 y1 x2 y2)
@@ -274,23 +237,23 @@
 (c-bytevector-set! fill-triangle-vertex3* 'int (* (c-type-size 'int) 0) x3)
 (c-bytevector-set! fill-triangle-vertex3* 'int (* (c-type-size 'int) 1) y3)
 
-(sdl-render-geometry renderer* (c-bytevector-null) fill-triangle-vertexes* 3 (c-bytevector-null) 0))
+(SDL_RenderGeometry renderer* (c-bytevector-null) fill-triangle-vertexes* 3 (c-bytevector-null) 0))
 
 (define (spite-option-set! name . value)
   (cond
     ((equal? name 'allow-window-resizing)
      (cond
        ((equal? value '(#t))
-        (sdl-set-window-resizable window* 1))
+        (SDL_SetWindowResizable window* 1))
        ((equal? value '(#f))
-        (sdl-set-window-resizable window* 0))
+        (SDL_SetWindowResizable window* 0))
        (else (error "Wrong option value for 'allow-window-resizing, must be #t or #f"
                     value))))
     ((equal? name 'renderer-size)
      (if (and (= (length value) 2)
               (number? (car value))
               (number? (cadr value)))
-       (sdl-render-setlogial-size renderer* (car value) (cadr value))
+       (SDL_RenderSetLogicalSize renderer* (car value) (cadr value))
        (error "Wrong option value for renderer-size, must be two numbers")))
     (else (error "No such option!" name))))
 
@@ -299,28 +262,26 @@
   (lambda ()
     (let ((x (make-c-bytevector (c-type-size 'float)))
           (y (make-c-bytevector (c-type-size 'float))))
-      (sdl-render-get-scale renderer* x y)
+      (SDL_RenderGetScale renderer* x y)
       (list (cons 'x (c-bytevector-ref x 'float 0))
             (cons 'y (c-bytevector-ref y 'float 0))))))
 
 (define spite-start
-  (lambda (new-update-procedure new-draw-procedure)
-    (set! update-procedure new-update-procedure)
-    (set! draw-procedure new-draw-procedure)
+  (lambda (update-procedure draw-procedure)
     (cond
       ((not started?)
        (set! started? #t)
-       (main-loop)))))
+       (main-loop update-procedure draw-procedure)))))
 
 (define spite-init
   (lambda (title width height)
     (cond
       ((not started?)
-       (sdl-init 32)
-       (set! window* (sdl-create-window (string->c-bytevector title) 0 0 width height 4))
-       (set! renderer* (sdl-create-renderer window* -1 2))
-       (sdl-render-setlogial-size renderer* width height)
-       (sdl-render-set-integer-scale renderer* 1)
+       (SDL_Init 32)
+       (set! window* (SDL_CreateWindow (string->c-bytevector title) 0 0 width height 4))
+       (set! renderer* (SDL_CreateRenderer window* -1 2))
+       (SDL_RenderSetLogicalSize renderer* width height)
+       (SDL_RenderSetIntegerScale renderer* 1)
        (render-clear)
        (render-present)
        (set! spite-inited? #t)))))

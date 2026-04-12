@@ -15,46 +15,18 @@ pipeline {
     parameters {
         string(name: 'R7RS_SCHEMES', defaultValue: 'chibi chicken gauche guile kawa mosh racket sagittarius stklos ypsilon', description: '')
         string(name: 'R6RS_SCHEMES', defaultValue: 'chezscheme guile ikarus ironscheme mosh racket sagittarius ypsilon', description: '')
-        string(name: 'LIBRARIES', defaultValue: 'system shell', description: '')
+        string(name: 'LIBRARIES', defaultValue: 'system named-pipes shell requests', description: '')
     }
 
     stages {
-        stage('Tests') {
-            parallel {
-                stage('R6RS') {
-                    steps {
-                        script {
-                            params.LIBRARIES.split().each { LIBRARY ->
-                            stage("${LIBRARY}") {
-                                    parallel params.R6RS_SCHEMES.split().collectEntries { SCHEME ->
-                                        [(SCHEME): {
-                                            def IMG="${SCHEME}:head"
-                                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                                                sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} test-r6rs-docker"
-                                            }
-                                        }]
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                stage('R7RS') {
-                    steps {
-                        script {
-                            params.LIBRARIES.split().each { LIBRARY ->
-                                stage("${LIBRARY}") {
-                                    parallel params.R7RS_SCHEMES.split().collectEntries() { SCHEME ->
-                                        [(SCHEME): {
-                                            def IMG="${SCHEME}:head"
-                                            if("${SCHEME}" == "chicken") {
-                                                IMG="${SCHEME}:5"
-                                            }
-                                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                                                sh "timeout 600 make SCHEME=${SCHEME} LIBRARY=${LIBRARY} test-r7rs-docker"
-                                            }
-                                        }]
-                                    }
+        stage('Test R6RS Debian') {
+            steps {
+                script {
+                    params.LIBRARIES.split().each { LIBRARY ->
+                        params.R6RS_SCHEMES.split().each { SCHEME ->
+                            stage("${SCHEME} ${LIBRARY}") {
+                                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                    sh "make SCHEME=${SCHEME} LIBRARY=${LIBRARY} RNRS=r6rs test-docker"
                                 }
                             }
                         }
@@ -62,6 +34,25 @@ pipeline {
                 }
             }
         }
-
+        stage('Test R7RS Debian') {
+            steps {
+                script {
+                    params.LIBRARIES.split().each { LIBRARY ->
+                        params.R7RS_SCHEMESsplit().each { SCHEME ->
+                            stage("${SCHEME} ${LIBRARY}") {
+                                catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                    sh "make SCHEME=${SCHEME} LIBRARY=${LIBRARY} RNRS=r7rs test-docker"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    post {
+        always {
+            cleanWs()
+        }
     }
 }
