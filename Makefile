@@ -31,9 +31,9 @@ APT_PACKAGES=libgirepository-2.0-dev
 CSC_OPTIONS=-L -lgirepository-2.0 -L -lgobject-2.0 -L -lglib-2.0
 endif
 
-all: build
+all: package
 
-build: retropikzel/${LIBRARY}/LICENSE retropikzel/${LIBRARY}/VERSION
+package: retropikzel/${LIBRARY}/LICENSE retropikzel/${LIBRARY}/VERSION
 	echo "<pre>$$(cat retropikzel/${LIBRARY}/README.md)</pre>" > ${README}
 	snow-chibi package \
 		--always-yes \
@@ -46,7 +46,7 @@ build: retropikzel/${LIBRARY}/LICENSE retropikzel/${LIBRARY}/VERSION
 install:
 	snow-chibi install --impls=${SCHEME} --always-yes ${PKG}
 
-testfiles: build
+testfiles: package
 	rm -rf .tmp
 	mkdir -p .tmp
 	cp -r test-resources .tmp/
@@ -58,12 +58,13 @@ testfiles: build
 	# R7RS testfiles
 	echo "(import (scheme base) (scheme write) (scheme read) (scheme char) (scheme file) (scheme process-context) (srfi 64) (foreign c) (retropikzel ${LIBRARY}))" > .tmp/test.scm
 	cat ${TESTFILE} >> .tmp/test.scm
+	cd .tmp && if [ "${RNRS}" = "r6rs" ]; then akku install akku-r7rs; fi
 
 test: testfiles
 	cd .tmp && \
 		COMPILE_R7RS=${SCHEME} \
 		CSC_OPTIONS="${CSC_OPTIONS}" \
-		compile-r7rs \
+		compile-r7rs ${LIB_PATHS} \
 		-o test-program \
 		test.${SFX}
 	cd .tmp && ./test-program
