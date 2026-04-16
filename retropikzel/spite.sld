@@ -12,6 +12,7 @@
           (c2foreign-c sdl2 render)
           (c2foreign-c sdl2 events)
           (c2foreign-c sdl2 keyboard)
+          (c2foreign-c sdl2-image)
           (foreign c))
   (export spite-init
           spite-start

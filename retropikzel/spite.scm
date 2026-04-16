@@ -10,15 +10,6 @@
 (define draw-color-g 0)
 (define draw-color-b 0)
 (define draw-color-a 255)
-(define-c-library sdl2-image*
-                  '("SDL2/SDL_image.h")
-                  "SDL2_image-2.0"
-                  `((additional-paths ("retropikzel/spite"
-                                       "snow/retropikzel/spite"))
-                    (additional-versions ("0"))))
-
-(define-c-procedure sdl-img-load-texture sdl2-image* 'IMG_LoadTexture 'pointer '(pointer pointer))
-
 (define window* #f)
 (define renderer* #f)
 (define event* (make-c-bytevector 4000))
@@ -144,7 +135,7 @@
     (when (not spite-inited?) (error "Can not load images until spite is inited." path))
     (when (not (string? path)) (error "Load path must be string" path))
     (when (not (file-exists? path)) (error (string-append "Could not load image, no such file: " path)))
-    (make-image (sdl-img-load-texture renderer* (string->c-bytevector path)) path)))
+    (make-image (IMG_LoadTexture renderer* (string->c-bytevector path)) path)))
 
 (define draw-image
   (lambda (image x y width height)
