@@ -3,29 +3,24 @@ DOCKER_TAG=latest
 IMAGE=${SCHEME}:${DOCKER_TAG}
 RNRS=r7rs
 LIBRARY=system
-EXAMPLE=editor
-EXAMPLE_FILE=retropikzel/${LIBRARY}/examples/${EXAMPLE}
 AUTHOR=Retropikzel
 
+SFX != if [ "${RNRS}" = "r6rs"]; then echo "sps"; else echo "scm"; fi
+VERSION != cat retropikzel/${LIBRARY}/VERSION
+PACKAGE_ARGS != cat retropikzel/${LIBRARY}/PACKAGE_ARGS || echo ""
+CSC_OPTIONS != cat retropikzel/${LIBRARY}/CSC_OPTIONS || echo ""
+APT_PACKAGES != cat retropikzel/${LIBRARY}/APT_PACKAGES || echo ""
+
 LIBRARY_FILE=retropikzel/${LIBRARY}.sld
-VERSION=$(shell cat retropikzel/${LIBRARY}/VERSION)
-DESCRIPTION=$(shell head -n1 retropikzel/${LIBRARY}/README.md)
+DESCRIPTION != head -n1 retropikzel/${LIBRARY}/README.md
 README=retropikzel/${LIBRARY}/README.html
 TESTFILE=retropikzel/${LIBRARY}/test.scm
-PACKAGE_ARGS=$(shell cat retropikzel/${LIBRARY}/PACKAGE_ARGS || echo "")
-CSC_OPTIONS=$(shell cat retropikzel/${LIBRARY}/CSC_OPTIONS || echo "")
-APTPACKAGES=$(shell cat retropikzel/${LIBRARY}/APT_PACKAGES || echo "")
 
 PKG=retropikzel-${LIBRARY}-${VERSION}.tgz
 
-SFX=sps
-ifeq "${RNRS}" "r7rs"
-SFX=scm
-endif
-
 all: package
 
-package: retropikzel/${LIBRARY}/LICENSE retropikzel/${LIBRARY}/VERSION
+package: retropikzel/${LIBRARY}/VERSION retropikzel/${LIBRARY}/README.md retropikzel/${LIBRARY}/LICENSE
 	echo "<pre>$$(cat retropikzel/${LIBRARY}/README.md)</pre>" > ${README}
 	snow-chibi package \
 		--always-yes \
