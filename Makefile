@@ -12,23 +12,15 @@ VERSION=$(shell cat retropikzel/${LIBRARY}/VERSION)
 DESCRIPTION=$(shell head -n1 retropikzel/${LIBRARY}/README.md)
 README=retropikzel/${LIBRARY}/README.html
 TESTFILE=retropikzel/${LIBRARY}/test.scm
+PACKAGE_ARGS=$(shell cat retropikzel/${LIBRARY}/PACKAGE_ARGS || echo "")
+CSC_OPTIONS=$(shell cat retropikzel/${LIBRARY}/CSC_OPTIONS || echo "")
+APTPACKAGES=$(shell cat retropikzel/${LIBRARY}/APT_PACKAGES || echo "")
 
 PKG=retropikzel-${LIBRARY}-${VERSION}.tgz
 
-SFX=scm
-SNOW=snow-chibi --impls=${SCHEME} install --always-yes
-LIB_PATHS=
-ifeq "${RNRS}" "r6rs"
-SNOW=snow-chibi --impls=${SCHEME} install --always-yes --install-source-dir=. --install-library-dir=.
 SFX=sps
-LIB_PATHS=-I .akku/lib
-endif
-
-APT_PACKAGES=
-CSC_OPTIONS=
-ifeq "${LIBRARY}" "gi-repository"
-APT_PACKAGES=libgirepository-2.0-dev
-CSC_OPTIONS=-L -lgirepository-2.0 -L -lgobject-2.0 -L -lglib-2.0
+ifeq "${RNRS}" "r7rs"
+SFX=scm
 endif
 
 all: package
@@ -37,6 +29,7 @@ package: retropikzel/${LIBRARY}/LICENSE retropikzel/${LIBRARY}/VERSION
 	echo "<pre>$$(cat retropikzel/${LIBRARY}/README.md)</pre>" > ${README}
 	snow-chibi package \
 		--always-yes \
+		${PACKAGE_ARGS} \
 		--version=${VERSION} \
 		--authors=${AUTHOR} \
 		--doc=${README} \
@@ -51,13 +44,16 @@ testfiles: package
 	mkdir -p .tmp
 	cp -r test-resources .tmp/
 	cp -r retropikzel .tmp/
-	cp ${PKG} .tmp/
 	# R6RS testfiles
 	printf "#!r6rs\n(import (except (rnrs) remove) (srfi :64) (foreign c) (retropikzel ${LIBRARY}))" > .tmp/test.sps
 	cat ${TESTFILE} >> .tmp/test.sps
 	# R7RS testfiles
 	echo "(import (scheme base) (scheme write) (scheme read) (scheme char) (scheme file) (scheme process-context) (srfi 64) (foreign c) (retropikzel ${LIBRARY}))" > .tmp/test.scm
 	cat ${TESTFILE} >> .tmp/test.scm
+	cp -r ../foreign-c/foreign .tmp/
+	cp -r ../generated-foreign-c-libraries/c2foreign-c .tmp/
+	cp ${PKG} .tmp/
+	cd .tmp && if [ "${RNRS}" = "r6rs" ]; then snow-chibi --impls=generic install --always-yes --install-source-dir=. --install-library-dir=. ${PKG}; fi
 	cd .tmp && if [ "${RNRS}" = "r6rs" ]; then akku install akku-r7rs; fi
 
 test: testfiles

@@ -1,0 +1,1 @@
+-L -lgirepository-2.0 -L -lgobject-2.0 -L -lglib-2.0

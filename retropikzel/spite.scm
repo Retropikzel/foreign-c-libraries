@@ -15,17 +15,14 @@
 (define event* (make-c-bytevector 4000))
 (define draw-rect* (make-c-bytevector (* (c-type-size 'int) 4)))
 (define draw-slice-rect* (make-c-bytevector (* (c-type-size 'int) 4)))
-(define fill-triangle-vertex-size (+ (* (c-type-size 'int) 6) (* (c-type-size 'float) 2)))
+(define fill-triangle-vertex-size 1024
+  ;; FIXME
+  ;(+ (* (c-type-size 'int) 6) (* (c-type-size 'float) 2))
+  )
 (define fill-triangle-vertex1* (make-c-bytevector fill-triangle-vertex-size 0))
 (define fill-triangle-vertex2* (make-c-bytevector fill-triangle-vertex-size 0))
 (define fill-triangle-vertex3* (make-c-bytevector fill-triangle-vertex-size 0))
 (define fill-triangle-vertexes* (make-c-bytevector (* fill-triangle-vertex-size 3 0)))
-(c-bytevector-set!
-  fill-triangle-vertexes* 'pointer (* fill-triangle-vertex-size 0) fill-triangle-vertex1*)
-(c-bytevector-set!
-  fill-triangle-vertexes* 'pointer (* fill-triangle-vertex-size 1) fill-triangle-vertex2*)
-(c-bytevector-set!
-  fill-triangle-vertexes* 'pointer (* fill-triangle-vertex-size 2) fill-triangle-vertex3*)
 
 (define main-loop-start-time 0)
 (define delta-time 0)
@@ -259,6 +256,9 @@
 
 (define spite-start
   (lambda (update-procedure draw-procedure)
+    (c-bytevector-set!  fill-triangle-vertexes* 'pointer (* fill-triangle-vertex-size 0) fill-triangle-vertex1*)
+    (c-bytevector-set!  fill-triangle-vertexes* 'pointer (* fill-triangle-vertex-size 1) fill-triangle-vertex2*)
+    (c-bytevector-set!  fill-triangle-vertexes* 'pointer (* fill-triangle-vertex-size 2) fill-triangle-vertex3*)
     (cond
       ((not started?)
        (set! started? #t)
