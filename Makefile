@@ -5,7 +5,12 @@ RNRS=r7rs
 LIBRARY=system
 AUTHOR=Retropikzel
 
-SFX != if [ "${RNRS}" = "r6rs"]; then echo "sps"; else echo "scm"; fi
+SFX=scm
+LIB_PATHS=-I .
+ifeq "${RNRS}" "r6rs"
+SFX=sps
+LIB_PATHS=-I .akku/lib
+endif
 VERSION != cat retropikzel/${LIBRARY}/VERSION
 PACKAGE_ARGS != cat retropikzel/${LIBRARY}/PACKAGE_ARGS || echo ""
 CSC_OPTIONS != cat retropikzel/${LIBRARY}/CSC_OPTIONS || echo ""
