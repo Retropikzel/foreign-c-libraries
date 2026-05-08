@@ -1,14 +1,51 @@
-Game library inspired by some other game library named after emotion built on
-top of [(foreign c)](https://sr.ht/~retropikzel/foreign-c/).
+Game library inspired by some other game library named after emotion
 
 Please note that Spite is currently in **alpha** stage.
 
 
-[Issue tracker](https://todo.sr.ht/~retropikzel/Spite)
+## Installation
 
-[Mailing lists](https://sr.ht/~retropikzel/Spite/lists)
+    snow-chibi install --impls=$SCHEME retropikzel.spite
 
-[Source](https://git.sr.ht/~retropikzel/spite)
+## Usage
+
+Example:
+
+    (import (scheme base)
+            (scheme write)
+            (scheme read)
+            (scheme file)
+            (foreign c)
+            (retropikzel spite))
+
+    (spite-init "Hello world" 400 400)
+
+    (define black '(0 0 0))
+
+    (define player-x 64)
+    (define player-y 64)
+
+    (define update
+      (lambda (delta-time events)
+        (for-each
+          (lambda (event)
+            (when (symbol=? (cdr (assoc 'type event)) 'key-down)
+              (let ((key (cdr (assoc 'key event))))
+                (when (string=? key "W") (set! player-y (- player-y 8)))
+                (when (string=? key "A") (set! player-x (- player-x 8)))
+                (when (string=? key "S") (set! player-y (+ player-y 8)))
+                (when (string=? key "D") (set! player-x (+ player-x 8)))
+                )))
+          events)
+        #t))
+
+    (define draw
+      (lambda ()
+        (apply set-draw-color black)
+        (fill-rectangle player-x player-y 32 32)))
+
+
+    (spite-start update draw)
 
 
 ## Documentation - Spite
