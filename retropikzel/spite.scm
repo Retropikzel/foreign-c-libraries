@@ -297,76 +297,62 @@
   (lambda ()
     (set! events (list))))
 
-(define-record-type bitmap-font
-  (internal-make-bitmap-font data)
+(define-record-type <bitmap-font>
+  (internal-make-bitmap-font image draw-width draw-height character-width character-height lookup-table)
   bitmap-font?
-  (data bitmap-font-data))
+  (image bitmap-font-image)
+  (draw-width bitmap-font-draw-width)
+  (draw-height bitmap-font-draw-height)
+  (character-width bitmap-font-character-width)
+  (character-height bitmap-font-character-height)
+  (lookup-table bitmap-font-lookup-table))
 
-(define (bitmap-font-get key bitmap)
-  (cdr (assoc key (bitmap-font-data bitmap))))
+(define (make-bitmap-font image character-width character-height draw-width draw-height character-lists)
+  (let* ((line-index -1)
+         (character-index -1)
+         (lookup-table (make-vector 0)))
+    (for-each
+      (lambda (line)
+        (set! line-index (+ line-index 1))
+        (set! character-index -1)
+        (for-each
+          (lambda (character)
+            (set! character-index (+ character-index 1))
+            (let ((c-int (char->integer character)))
+              (when (<= (vector-length lookup-table) c-int)
+                (set! lookup-table
+                  (vector-append
+                    lookup-table
+                    (make-vector (+ (- c-int (vector-length lookup-table)) 1) #f))))
+              (vector-set! lookup-table
+                           c-int
+                           (vector character
+                                   (* character-index character-width)
+                                   (* line-index character-height)))))
+          line))
+      character-lists)
+    (internal-make-bitmap-font image draw-width draw-height character-width character-height lookup-table)))
 
-(define-record-type bitmap-char
-  (make-bitmap-char char x y)
-  bitmap-char?
-  (char bitmap-char-char)
-  (x bitmap-char-x)
-  (y bitmap-char-y))
-
-(define (make-bitmap-font image character-width character-height draw-width draw-height character-lines)
-  (let* ((line-items-count (string-length (car character-lines)))
-         (characters (apply string-append character-lines))
-         (index -1)
-         (character-indexes (list))
-         (character-positions
-           (map (lambda (character)
-                  (set! index (+ index 1))
-                  (set! character-indexes (append character-indexes (list character index)))
-                  (list character
-                        (* (modulo index line-items-count)
-                           character-width)
-                        (* (floor (/ index line-items-count))
-                           character-height)))
-                (string->list characters))))
-    (internal-make-bitmap-font
-      `((image . ,image)
-        (character-width . ,character-width)
-        (character-height . ,character-height)
-        (character-draw-width . ,draw-width)
-        (character-draw-height . ,draw-height)
-        (line-items-count . ,line-items-count)
-        (characters . ,characters)
-        (character-indexes . ,character-indexes)
-        (character-positions . ,character-positions)))))
-
-(define (set-bitmap-font font)
-  (set! current-bitmap-font font))
-
-(define (make-bitmap-text text font)
-  (map
-    (lambda (c)
-      (make-bitmap-char
-        c
-        (cadr (assq c (bitmap-font-get 'character-positions font)))
-        (cadr (cdr (assq c (bitmap-font-get 'character-positions font))))))
-    (string->list text)))
-
+(define (set-bitmap-font font) (set! current-bitmap-font font))
 
 (define draw-bitmap-text
   (lambda (text x y)
     (when (not current-bitmap-font)
       (error "Current bitmap font not set, use make-bitmap-font and set-bitmap-font"))
-    (let ((offset-x x))
+    (let ((offset-x x)
+          (lookup-table (bitmap-font-lookup-table current-bitmap-font)))
       (for-each
-        (lambda (bitmap-char)
-          (draw-image-slice (bitmap-font-get 'image current-bitmap-font)
-                            offset-x
-                            y
-                            (bitmap-font-get 'character-draw-width current-bitmap-font)
-                            (bitmap-font-get 'character-draw-height current-bitmap-font)
-                            (bitmap-char-x bitmap-char)
-                            (bitmap-char-y bitmap-char)
-                            (bitmap-font-get 'character-width current-bitmap-font)
-                            (bitmap-font-get 'character-height current-bitmap-font))
-          (set! offset-x (+ offset-x (bitmap-font-get 'character-draw-width current-bitmap-font))))
-        (make-bitmap-text text current-bitmap-font)))))
+        (lambda (character)
+          (let ((char-data (vector-ref lookup-table (char->integer character))))
+            (draw-image-slice (bitmap-font-image current-bitmap-font)
+                              offset-x
+                              y
+                              (bitmap-font-draw-width current-bitmap-font)
+                              (bitmap-font-draw-height current-bitmap-font)
+                              (vector-ref char-data 1)
+                              (vector-ref char-data 2)
+                              (bitmap-font-character-width current-bitmap-font)
+                              (bitmap-font-character-height current-bitmap-font))
+            (set! offset-x (+ offset-x 14))))
+        (string->list text)))))
 

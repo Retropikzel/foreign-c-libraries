@@ -7,6 +7,7 @@
           (scheme file)
           (scheme load)
           (scheme time)
+          (scheme char)
           (c2foreign-c sdl2 init)
           (c2foreign-c sdl2 video)
           (c2foreign-c sdl2 render)
