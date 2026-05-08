@@ -2,6 +2,9 @@ Game library inspired by some other game library named after emotion
 
 Please note that Spite is currently in **alpha** stage.
 
+## Dependencies
+
+SDL2 and SDL2 Image libraries.
 
 ## Installation
 
