@@ -1,6 +1,5 @@
 SCHEME=chibi
-DOCKER_TAG=latest
-IMAGE=${SCHEME}:${DOCKER_TAG}
+DOCKER_TAG=head
 RNRS=r7rs
 LIBRARY=system
 AUTHOR=Retropikzel
@@ -43,7 +42,7 @@ testfiles: package
 	rm -rf .tmp
 	mkdir -p .tmp
 	cp -r test-resources .tmp/
-	cp -r retropikzel .tmp/
+	if [ "${RNRS}" = "${R6RS}" ]; then cp -r retropikzel .tmp/; fi
 	# R6RS testfiles
 	printf "#!r6rs\n(import (except (rnrs) remove) (srfi :64) (foreign c) (retropikzel ${LIBRARY}))" > .tmp/test.sps
 	cat ${TESTFILE} >> .tmp/test.sps
@@ -53,28 +52,23 @@ testfiles: package
 	cp -r ../foreign-c/foreign .tmp/
 	cp -r ../generated-foreign-c-libraries/c2foreign-c .tmp/
 	cp ${PKG} .tmp/
-	cd .tmp && if [ "${RNRS}" = "r6rs" ]; then snow-chibi --impls=generic install --always-yes --install-source-dir=. --install-library-dir=. ${PKG}; fi
-	cd .tmp && if [ "${RNRS}" = "r6rs" ]; then akku install akku-r7rs; fi
 
 test: testfiles
 	cd .tmp && \
 		COMPILE_R7RS=${SCHEME} \
 		CSC_OPTIONS="${CSC_OPTIONS}" \
-		compile-r7rs ${LIB_PATHS} \
-		-o test-program \
-		test.${SFX}
+		compile-r7rs ${LIB_PATHS} -o test-program test.${SFX}
 	cd .tmp && ./test-program
 
 test-docker: testfiles
 	cd .tmp && \
+		TEST_R7RS_DEBUG=1 \
+		DOCKER_TAG=${DOCKER_TAG} \
 		COMPILE_R7RS=${SCHEME} \
 		CSC_OPTIONS="${CSC_OPTIONS}" \
-		SNOW_PACKAGES="srfi.64 foreign.c" \
+		SNOW_PACKAGES="srfi.64 srfi.170 foreign.c retropikzel.system retropikzel.named-pipes ${PKG}" \
 		APT_PACKAGES="${APT_PACKAGES}" \
-		test-r7rs \
-		-o test-program \
-		test.${SFX} \
-		${PKG}
+		test-r7rs -o test-program test.${SFX}
 
 clean:
 	git clean -X -f

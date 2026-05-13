@@ -4,6 +4,7 @@
           (scheme write)
           (scheme read)
           (scheme file)
+          (srfi 170)
           (foreign c)
           (retropikzel system)
           (retropikzel named-pipes))
