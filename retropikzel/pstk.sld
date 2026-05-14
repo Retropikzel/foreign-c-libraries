@@ -109,10 +109,6 @@
           (retropikzel named-pipes)
           (retropikzel system)
           (srfi 170))
-          (cond-expand
-            ;; Temporary workaround because of https://github.com/egallesio/STklos/issues/888
-            (stklos (import (only (stklos) create-temp-file)))
-            (else))
   (export tk-eval
           tk-id->widget
           tk-var

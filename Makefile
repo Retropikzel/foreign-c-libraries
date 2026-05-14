@@ -1,5 +1,5 @@
 SCHEME=chibi
-DOCKER_TAG=latest
+DOCKER_TAG=head
 RNRS=r7rs
 LIBRARY=system
 AUTHOR=Retropikzel
