@@ -1,15 +1,7 @@
 (define (temp-name)
-  (random-source-randomize! default-random-source)
-  (let ((file (string-append "/tmp/pstk-"
-                             (number->string (random-integer 1000))
-                             "-"
-                             (number->string (random-integer 1000))
-                             "-"
-                             (number->string (random-integer 1000)))))
-    (if (file-exists? file)
-      (temp-name)
-      file)))
-
+  (let ((filename (create-temp-file "pstk.")))
+    (delete-file filename)
+    filename))
 (define wish-display pipe-write-string)
 (define wish-read (lambda (pipe)
                     (let ((result (pipe-read pipe)))
@@ -41,17 +33,21 @@
 
 (define *use-keywords?*
   (cond-expand
+    (chicken #t)
+    (kawa #t)
     (stklos #t)
     (else #f)))
 
 (define (%keyword? x)
   (cond-expand
+    (chicken (keyword? x))
     (kawa (keyword? x))
     (srfi-88 (keyword? x))
     (else (error "Keywords not supported" x))))
 
 (define (%keyword->string x)
   (cond-expand
+    (chicken (keyword->string x))
     (kawa (keyword->string x))
     (stklos (keyword->string x))
     (else (error "Keywords not supported" x))))

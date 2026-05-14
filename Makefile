@@ -1,5 +1,5 @@
 SCHEME=chibi
-DOCKER_TAG=head
+DOCKER_TAG=latest
 RNRS=r7rs
 LIBRARY=system
 AUTHOR=Retropikzel
@@ -66,7 +66,7 @@ test-docker: testfiles
 		DOCKER_TAG=${DOCKER_TAG} \
 		COMPILE_R7RS=${SCHEME} \
 		CSC_OPTIONS="${CSC_OPTIONS}" \
-		SNOW_PACKAGES="srfi.64 srfi.170 foreign.c retropikzel.system retropikzel.named-pipes ${PKG}" \
+		SNOW_PACKAGES="foreign.c srfi.64 srfi.170 retropikzel.system retropikzel.named-pipes ${PKG}" \
 		APT_PACKAGES="${APT_PACKAGES}" \
 		test-r7rs -o test-program test.${SFX}
 
