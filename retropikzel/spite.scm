@@ -27,13 +27,13 @@
 (define main-loop-start-time 0)
 (define delta-time 0)
 (define (main-loop update-procedure draw-procedure)
-  (set! main-loop-start-time (current-jiffy))
+  (set! main-loop-start-time (SDL_GetTicks))
   (sdl2-events-get)
   (update-procedure delta-time (poll-events!))
   (render-clear)
   (draw-procedure)
   (render-present)
-  (set! delta-time (/ (- (current-jiffy) main-loop-start-time) (jiffies-per-second)))
+  (set! delta-time (- (SDL_GetTicks) main-loop-start-time))
   (unless exit? (main-loop update-procedure draw-procedure)))
 
 (define sdl2-event->spite-event
@@ -130,12 +130,16 @@
 (define load-image
   (lambda (path)
     (when (not spite-inited?) (error "Can not load images until spite is inited." path))
-    (when (not (string? path)) (error "Load path must be string" path))
-    (when (not (file-exists? path)) (error (string-append "Could not load image, no such file: " path)))
+    (when (not (string? path)) (error "load-image: path must be string" path))
+    (when (not (file-exists? path)) (error (string-append "load-image: no such file: " path)))
     (make-image (IMG_LoadTexture renderer* (string->c-bytevector path)) path)))
 
 (define draw-image
   (lambda (image x y width height)
+    (when (not (exact-integer? x)) (error "draw-image: x must be exact integer"))
+    (when (not (exact-integer? y)) (error "draw-image: y must be exact integer"))
+    (when (not (exact-integer? width)) (error "draw-image: width must be exact integer"))
+    (when (not (exact-integer? height)) (error "draw-image: width must be exact integer"))
     (c-bytevector-set! draw-rect* 'int (* (c-type-size 'int) 0) x)
     (c-bytevector-set! draw-rect* 'int (* (c-type-size 'int) 1) y)
     (c-bytevector-set! draw-rect* 'int (* (c-type-size 'int) 2) width)
@@ -144,6 +148,14 @@
 
 (define draw-image-slice
   (lambda (image x y width height slice-x slice-y slice-width slice-height)
+    (when (not (exact-integer? x)) (error "draw-image: x must be exact integer"))
+    (when (not (exact-integer? y)) (error "draw-image: y must be exact integer"))
+    (when (not (exact-integer? width)) (error "draw-image: width must be exact integer"))
+    (when (not (exact-integer? height)) (error "draw-image: width must be exact integer"))
+    (when (not (exact-integer? slice-x)) (error "draw-image: slice-x must be exact integer"))
+    (when (not (exact-integer? slice-y)) (error "draw-image: slice-y must be exact integer"))
+    (when (not (exact-integer? slice-width)) (error "draw-image: slice-width must be exact integer"))
+    (when (not (exact-integer? slice-height)) (error "draw-image: slice-width must be exact integer"))
     (c-bytevector-set! draw-rect* 'int (* (c-type-size 'int) 0) x)
     (c-bytevector-set! draw-rect* 'int (* (c-type-size 'int) 1) y)
     (c-bytevector-set! draw-rect* 'int (* (c-type-size 'int) 2) width)
@@ -155,6 +167,10 @@
     (SDL_RenderCopy renderer* (image-pointer image) draw-slice-rect* draw-rect*)))
 
 (define (set-draw-color r g b . a)
+  (when (not (exact-integer? r)) (error "set-draw-color: r must be exact integer"))
+  (when (not (exact-integer? g)) (error "set-draw-color: g must be exact integer"))
+  (when (not (exact-integer? b)) (error "set-draw-color: b must be exact integer"))
+  (when (and (not (null? a)) (not (exact-integer? (car a)))) (error "set-draw-color: a must be exact integer"))
   (set! draw-color-r r)
   (set! draw-color-g g)
   (set! draw-color-b b)
@@ -178,10 +194,13 @@
   (SDL_SetRenderDrawColor renderer* r g b draw-color-a))
 
 (define (set-line-size size)
+  (when (not (exact-integer? size)) (error "set-line-size: size must be exact integer"))
   (set! current-line-size size)
   (SDL_RenderSetScale renderer* (inexact (/ size 1)) (inexact (/ size 1))))
 
 (define (draw-point x y)
+  (when (not (exact-integer? x)) (error "draw-point: x must be exact integer"))
+  (when (not (exact-integer? y)) (error "draw-point: y must be exact integer"))
   (SDL_RenderDrawLine renderer*
                         (exact (round (/ x current-line-size)))
                         (exact (round (/ y current-line-size)))
@@ -189,6 +208,10 @@
                         (exact (round (/ y current-line-size)))))
 
 (define (draw-line x1 y1 x2 y2)
+  (when (not (exact-integer? x1)) (error "draw-line: x1 must be exact integer"))
+  (when (not (exact-integer? y1)) (error "draw-line: y1 must be exact integer"))
+  (when (not (exact-integer? x2)) (error "draw-line: x2 must be exact integer"))
+  (when (not (exact-integer? y2)) (error "draw-line: y2 must be exact integer"))
   (SDL_RenderDrawLine renderer*
                         (exact (round (/ x1 current-line-size)))
                         (exact (round (/ y1 current-line-size)))
@@ -196,6 +219,10 @@
                         (exact (round (/ y2 current-line-size)))))
 
 (define (draw-rectangle x y width height)
+  (when (not (exact-integer? x)) (error "draw-rectangle: x must be exact integer"))
+  (when (not (exact-integer? y)) (error "draw-rectangle: y must be exact integer"))
+  (when (not (exact-integer? width)) (error "draw-rectangle: width must be exact integer"))
+  (when (not (exact-integer? height)) (error "draw-rectangle: width must be exact integer"))
   (c-bytevector-set! draw-rect* 'int (* (c-type-size 'int) 0) x)
   (c-bytevector-set! draw-rect* 'int (* (c-type-size 'int) 1) y)
   (c-bytevector-set! draw-rect* 'int (* (c-type-size 'int) 2) width)
@@ -203,6 +230,10 @@
   (SDL_RenderDrawRect renderer* draw-rect*))
 
 (define (fill-rectangle x y width height)
+  (when (not (exact-integer? x)) (error "fill-rectangle: x must be exact integer"))
+  (when (not (exact-integer? y)) (error "fill-rectangle: y must be exact integer"))
+  (when (not (exact-integer? width)) (error "fill-rectangle: width must be exact integer"))
+  (when (not (exact-integer? height)) (error "fill-rectangle: width must be exact integer"))
   (c-bytevector-set! draw-rect* 'int (* (c-type-size 'int) 0) x)
   (c-bytevector-set! draw-rect* 'int (* (c-type-size 'int) 1) y)
   (c-bytevector-set! draw-rect* 'int (* (c-type-size 'int) 2) width)
@@ -210,6 +241,12 @@
   (SDL_RenderFillRect renderer* draw-rect*))
 
 (define (draw-triangle x1 y1 x2 y2 x3 y3)
+  (when (not (exact-integer? x1)) (error "draw-triangle: x1 must be exact integer"))
+  (when (not (exact-integer? y1)) (error "draw-triangle: y1 must be exact integer"))
+  (when (not (exact-integer? x2)) (error "draw-triangle: x2 must be exact integer"))
+  (when (not (exact-integer? y2)) (error "draw-triangle: y2 must be exact integer"))
+  (when (not (exact-integer? x3)) (error "draw-triangle: x3 must be exact integer"))
+  (when (not (exact-integer? y3)) (error "draw-triangle: y3 must be exact integer"))
   (draw-line x1 y1 x2 y2)
   (draw-line x2 y2 x3 y3)
   (draw-line x3 y3 x1 y1))
@@ -256,9 +293,11 @@
 
 (define spite-start
   (lambda (update-procedure draw-procedure)
-    (c-bytevector-set!  fill-triangle-vertexes* 'pointer (* fill-triangle-vertex-size 0) fill-triangle-vertex1*)
-    (c-bytevector-set!  fill-triangle-vertexes* 'pointer (* fill-triangle-vertex-size 1) fill-triangle-vertex2*)
-    (c-bytevector-set!  fill-triangle-vertexes* 'pointer (* fill-triangle-vertex-size 2) fill-triangle-vertex3*)
+    (when (not (procedure? update-procedure)) (error "spite-start: update-procedure must be procedure"))
+    (when (not (procedure? draw-procedure)) (error "spite-start: draw-procedure must be procedure"))
+    (c-bytevector-set! fill-triangle-vertexes* 'pointer (* fill-triangle-vertex-size 0) fill-triangle-vertex1*)
+    (c-bytevector-set! fill-triangle-vertexes* 'pointer (* fill-triangle-vertex-size 1) fill-triangle-vertex2*)
+    (c-bytevector-set! fill-triangle-vertexes* 'pointer (* fill-triangle-vertex-size 2) fill-triangle-vertex3*)
     (cond
       ((not started?)
        (set! started? #t)
@@ -266,6 +305,8 @@
 
 (define spite-init
   (lambda (title width height)
+    (when (not (exact-integer? width)) (error "spite-init: width must be exact integer"))
+    (when (not (exact-integer? height)) (error "spite-init: height must be exact integer"))
     (cond
       ((not started?)
        (SDL_Init 32)
