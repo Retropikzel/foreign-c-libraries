@@ -29,7 +29,7 @@
 (define (main-loop update-procedure draw-procedure)
   (set! main-loop-start-time (SDL_GetTicks))
   (sdl2-events-get)
-  (update-procedure delta-time (poll-events!))
+  (update-procedure main-loop-start-time delta-time (poll-events!))
   (render-clear)
   (draw-procedure)
   (render-present)

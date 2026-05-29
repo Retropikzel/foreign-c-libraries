@@ -29,7 +29,7 @@ Example:
     (define player-y 64)
 
     (define update
-      (lambda (delta-time events)
+      (lambda (time-ms delta-time events)
         (for-each
           (lambda (event)
             (when (symbol=? (cdr (assoc 'type event)) 'key-down)
