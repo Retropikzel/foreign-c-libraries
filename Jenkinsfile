@@ -26,8 +26,8 @@ pipeline {
     }
 
     environment {
-        R7RS_SCHEMES='chibi chicken gauche guile kawa mosh racket sagittarius stklos ypsilon'
         R6RS_SCHEMES='chezscheme guile ikarus ironscheme mosh racket sagittarius ypsilon'
+        R7RS_SCHEMES='chibi chicken gauche guile kawa mosh racket sagittarius stklos ypsilon'
         LIBRARIES='system named-pipes shell download-file'
     }
 
@@ -51,7 +51,7 @@ pipeline {
             steps {
                 script {
                     env.LIBRARIES.split().each { LIBRARY ->
-                        env.R7RS_SCHEMESsplit().each { SCHEME ->
+                        env.R7RS_SCHEMES.split().each { SCHEME ->
                             stage("${SCHEME} ${LIBRARY}") {
                                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                                     sh "make SCHEME=${SCHEME} LIBRARY=${LIBRARY} RNRS=r7rs test-docker"
