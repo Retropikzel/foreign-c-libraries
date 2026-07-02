@@ -3,6 +3,6 @@
 
 (define (system command)
   (let* ((command-cbv (string->c-bytevector command))
-         (result (c-system command-pointer)))
+         (result (c-system command-cbv)))
     (c-bytevector-free command-cbv)
     result))

@@ -74,6 +74,4 @@
                (error-string (c-bytevector->string error-cbv)))
           (c-bytevector-free error-cbv)
           (error error-string url)))
-      (curl-easy-cleanup handle)
-      ;(c-bytevector-free file-mode-cbv to-path-cbv to-file-cbv url-cbv)
-      )))
+      (curl-easy-cleanup handle))))
