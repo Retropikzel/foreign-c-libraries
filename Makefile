@@ -35,10 +35,12 @@ package: retropikzel/${LIBRARY}/VERSION retropikzel/${LIBRARY}/README.md retropi
 		--description="${DESCRIPTION}" \
 		${LIBRARY_FILE}
 
+${PKG}: package
+
 install:
 	snow-chibi install --impls=${SCHEME} --always-yes ${PKG}
 
-testfiles: package
+testfiles: ${PKG}
 	rm -rf .tmp
 	mkdir -p .tmp
 	cp -r test-resources .tmp/
@@ -49,8 +51,6 @@ testfiles: package
 	# R7RS testfiles
 	echo "(import (scheme base) (scheme write) (scheme read) (scheme char) (scheme file) (scheme process-context) (srfi 64) (foreign c) (retropikzel ${LIBRARY}))" > .tmp/test.scm
 	cat ${TESTFILE} >> .tmp/test.scm
-	cp -r ../foreign-c/foreign .tmp/
-	cp -r ../generated-foreign-c-libraries/c2foreign-c .tmp/
 	cp ${PKG} .tmp/
 
 test: testfiles
