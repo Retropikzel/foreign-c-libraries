@@ -25,3 +25,4 @@ example
 venv
 foreign
 tmp
+*.json

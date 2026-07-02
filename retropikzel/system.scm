@@ -2,7 +2,7 @@
 (define-c-procedure c-system libc 'system 'int '(pointer))
 
 (define (system command)
-  (let* ((command-pointer (string->c-bytevector command))
+  (let* ((command-cbv (string->c-bytevector command))
          (result (c-system command-pointer)))
-    (c-bytevector-free command-pointer)
+    (c-bytevector-free command-cbv)
     result))

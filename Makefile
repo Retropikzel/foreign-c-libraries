@@ -66,7 +66,8 @@ test-docker: testfiles
 		DOCKER_TAG=${DOCKER_TAG} \
 		COMPILE_R7RS=${SCHEME} \
 		CSC_OPTIONS="${CSC_OPTIONS}" \
-		SNOW_PACKAGES="foreign.c srfi.64 srfi.170 retropikzel.system retropikzel.named-pipes ${PKG}" \
+		SNOW_PACKAGES="srfi.64 ${PKG}" \
+		AKKU_PACKAGES="akku-r7rs" \
 		APT_PACKAGES="${APT_PACKAGES}" \
 		PASS_ENV_VARS="CSC_OPTIONS" \
 		test-r7rs -o test-program test.${SFX}
