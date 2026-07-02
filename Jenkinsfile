@@ -12,18 +12,18 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
     }
 
-    parameters {
-        string(name: 'R7RS_SCHEMES', defaultValue: 'chibi chicken gauche guile kawa mosh racket sagittarius stklos ypsilon', description: '')
-        string(name: 'R6RS_SCHEMES', defaultValue: 'chezscheme guile ikarus ironscheme mosh racket sagittarius ypsilon', description: '')
-        string(name: 'LIBRARIES', defaultValue: 'system named-pipes shell requests', description: '')
+    environment {
+        R7RS_SCHEMES='chibi chicken gauche guile kawa mosh racket sagittarius stklos ypsilon'
+        R6RS_SCHEMES='chezscheme guile ikarus ironscheme mosh racket sagittarius ypsilon'
+        LIBRARIES='system named-pipes shell download-file'
     }
 
     stages {
         stage('Test R6RS Debian') {
             steps {
                 script {
-                    params.LIBRARIES.split().each { LIBRARY ->
-                        params.R6RS_SCHEMES.split().each { SCHEME ->
+                    env.LIBRARIES.split().each { LIBRARY ->
+                        env.R6RS_SCHEMES.split().each { SCHEME ->
                             stage("${SCHEME} ${LIBRARY}") {
                                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                                     sh "make SCHEME=${SCHEME} LIBRARY=${LIBRARY} RNRS=r6rs test-docker"
@@ -37,8 +37,8 @@ pipeline {
         stage('Test R7RS Debian') {
             steps {
                 script {
-                    params.LIBRARIES.split().each { LIBRARY ->
-                        params.R7RS_SCHEMESsplit().each { SCHEME ->
+                    env.LIBRARIES.split().each { LIBRARY ->
+                        env.R7RS_SCHEMESsplit().each { SCHEME ->
                             stage("${SCHEME} ${LIBRARY}") {
                                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
                                     sh "make SCHEME=${SCHEME} LIBRARY=${LIBRARY} RNRS=r7rs test-docker"

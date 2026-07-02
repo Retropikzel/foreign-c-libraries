@@ -68,6 +68,7 @@ test-docker: testfiles
 		CSC_OPTIONS="${CSC_OPTIONS}" \
 		SNOW_PACKAGES="foreign.c srfi.64 srfi.170 retropikzel.system retropikzel.named-pipes ${PKG}" \
 		APT_PACKAGES="${APT_PACKAGES}" \
+		PASS_ENV_VARS="CSC_OPTIONS" \
 		test-r7rs -o test-program test.${SFX}
 
 clean:

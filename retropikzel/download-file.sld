@@ -1,0 +1,10 @@
+(define-library
+  (retropikzel download-file)
+  (import (scheme base)
+          (scheme write)
+          (scheme char)
+          (scheme file)
+          (scheme process-context)
+          (foreign c))
+  (export download-file)
+  (include "download-file.scm"))
