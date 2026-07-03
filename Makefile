@@ -5,7 +5,7 @@ LIBRARY=system
 AUTHOR=Retropikzel
 
 SFX=scm
-LIB_PATHS=-I .
+LIB_PATHS=
 ifeq "${RNRS}" "r6rs"
 SFX=sps
 LIB_PATHS=-I .akku/lib
