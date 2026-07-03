@@ -56,6 +56,7 @@ testfiles: ${PKG}
 
 test: testfiles
 	cd ${tmpdir} && \
+		COMPILE_R7RS_DEBUG=1 \
 		COMPILE_R7RS=${SCHEME} \
 		CSC_OPTIONS="${CSC_OPTIONS}" \
 		compile-r7rs ${LIB_PATHS} -o test-program test.${SFX}
