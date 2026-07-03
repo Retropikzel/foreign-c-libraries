@@ -33,18 +33,16 @@ pipeline {
     }
 
     stages {
-        stage('Parallel') {
-            parallel {
-                stage('Test R6RS Debian') {
-                    steps {
-                        script {
-                            env.LIBRARIES.split().each { LIBRARY ->
-                                stage("${LIBRARY}") {
-                                    env.R6RS_SCHEMES.split().each { SCHEME ->
-                                        stage("${SCHEME}") {
-                                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                                                sh "make SCHEME=${SCHEME} LIBRARY=${LIBRARY} RNRS=r6rs test-docker"
-                                            }
+        stage('Test R6RS Debian') {
+            steps {
+                script {
+                    env.LIBRARIES.split().each { LIBRARY ->
+                        stage("${LIBRARY}") {
+                            parallel {
+                                env.R6RS_SCHEMES.split().each { SCHEME ->
+                                    stage("${SCHEME}") {
+                                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                            sh "make SCHEME=${SCHEME} LIBRARY=${LIBRARY} RNRS=r6rs test-docker"
                                         }
                                     }
                                 }
@@ -52,16 +50,18 @@ pipeline {
                         }
                     }
                 }
-                stage('Test R7RS Debian') {
-                    steps {
-                        script {
-                            env.LIBRARIES.split().each { LIBRARY ->
-                                stage("${LIBRARY}") {
-                                    env.R7RS_SCHEMES.split().each { SCHEME ->
-                                        stage("${SCHEME}") {
-                                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                                                sh "make SCHEME=${SCHEME} LIBRARY=${LIBRARY} RNRS=r7rs test-docker"
-                                            }
+            }
+        }
+        stage('Test R7RS Debian') {
+            steps {
+                script {
+                    env.LIBRARIES.split().each { LIBRARY ->
+                        stage("${LIBRARY}") {
+                            parallel {
+                                env.R7RS_SCHEMES.split().each { SCHEME ->
+                                    stage("${SCHEME}") {
+                                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                            sh "make SCHEME=${SCHEME} LIBRARY=${LIBRARY} RNRS=r7rs test-docker"
                                         }
                                     }
                                 }
