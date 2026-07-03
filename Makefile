@@ -1,3 +1,4 @@
+.SILENT:
 SCHEME=chibi
 DOCKER_TAG=head
 RNRS=r7rs
@@ -12,9 +13,9 @@ SFX=sps
 LIB_PATHS=-I .akku/lib
 endif
 VERSION != cat retropikzel/${LIBRARY}/VERSION
-PACKAGE_ARGS != cat retropikzel/${LIBRARY}/PACKAGE_ARGS || echo ""
-CSC_OPTIONS != cat retropikzel/${LIBRARY}/CSC_OPTIONS || echo ""
-APT_PACKAGES != cat retropikzel/${LIBRARY}/APT_PACKAGES || echo ""
+PACKAGE_ARGS != cat retropikzel/${LIBRARY}/PACKAGE_ARGS 2> /dev/null || echo ""
+CSC_OPTIONS != cat retropikzel/${LIBRARY}/CSC_OPTIONS 2> /dev/null || echo ""
+APT_PACKAGES != cat retropikzel/${LIBRARY}/APT_PACKAGES 2> /dev/null || echo ""
 
 LIBRARY_FILE=retropikzel/${LIBRARY}.sld
 DESCRIPTION != head -n1 retropikzel/${LIBRARY}/README.md
