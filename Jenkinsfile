@@ -38,10 +38,12 @@ pipeline {
                 script {
                     env.LIBRARIES.split().each { LIBRARY ->
                         stage("${LIBRARY}") {
-                            env.R6RS_SCHEMES.split().each { SCHEME ->
-                                stage("${SCHEME}") {
-                                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                                        sh "make SCHEME=${SCHEME} LIBRARY=${LIBRARY} RNRS=r6rs test-docker"
+                            parallel {
+                                env.R6RS_SCHEMES.split().each { SCHEME ->
+                                    stage("${SCHEME}") {
+                                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                            sh "make SCHEME=${SCHEME} LIBRARY=${LIBRARY} RNRS=r6rs test-docker"
+                                        }
                                     }
                                 }
                             }
@@ -55,10 +57,12 @@ pipeline {
                 script {
                     env.LIBRARIES.split().each { LIBRARY ->
                         stage("${LIBRARY}") {
-                            env.R7RS_SCHEMES.split().each { SCHEME ->
-                                stage("${SCHEME}") {
-                                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                                        sh "make SCHEME=${SCHEME} LIBRARY=${LIBRARY} RNRS=r7rs test-docker"
+                            parallel {
+                                env.R7RS_SCHEMES.split().each { SCHEME ->
+                                    stage("${SCHEME}") {
+                                        catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                                            sh "make SCHEME=${SCHEME} LIBRARY=${LIBRARY} RNRS=r7rs test-docker"
+                                        }
                                     }
                                 }
                             }
