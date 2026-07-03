@@ -27,8 +27,8 @@ pipeline {
     }
 
     environment {
-        R6RS_SCHEMES='chezscheme guile ikarus ironscheme mosh racket sagittarius ypsilon'
-        R7RS_SCHEMES='chibi chicken gauche guile kawa mosh racket sagittarius stklos ypsilon'
+        R6RS_SCHEMES='capyscheme chezscheme ikarus ironscheme mosh racket sagittarius ypsilon'
+        R7RS_SCHEMES='capyscheme chibi chicken gauche kawa mosh racket sagittarius stklos ypsilon'
         LIBRARIES='system named-pipes shell download-file'
     }
 

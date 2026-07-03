@@ -71,7 +71,7 @@ test-docker: testfiles
 		AKKU_PACKAGES="akku-r7rs" \
 		APT_PACKAGES="${APT_PACKAGES}" \
 		PASS_ENV_VARS="CSC_OPTIONS" \
-		test-r7rs -o test-program ${LIB_PATHS} test.${SFX}
+		test-r7rs ${LIB_PATHS} -o test-program test.${SFX}
 
 clean:
 	git clean -X -f
