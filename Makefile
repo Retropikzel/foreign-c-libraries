@@ -1,6 +1,6 @@
 .SILENT:
 SCHEME=chibi
-DOCKER_TAG=head
+DOCKER_TAG=latest
 RNRS=r7rs
 LIBRARY=system
 AUTHOR=Retropikzel
@@ -23,6 +23,19 @@ README=retropikzel/${LIBRARY}/README.html
 TESTFILE=retropikzel/${LIBRARY}/test.scm
 
 PKG=retropikzel-${LIBRARY}-${VERSION}.tgz
+
+ifeq "${SCHEME}" "capyscheme"
+DOCKER_TAG=head
+endif
+ifeq "${SCHEME}" "chibi"
+DOCKER_TAG=head
+endif
+ifeq "${SCHEME}" "chicken"
+DOCKER_TAG=head
+endif
+ifeq "${SCHEME}" "gauche"
+DOCKER_TAG=head
+endif
 
 all: package
 
