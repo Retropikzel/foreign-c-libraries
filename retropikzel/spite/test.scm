@@ -30,7 +30,7 @@
 (set-bitmap-font font)
 
 (define update
-  (lambda (delta-time events)
+  (lambda (time-ms delta-time events)
     (for-each
       (lambda (event)
         (when (symbol=? (cdr (assoc 'type event)) 'key-down)
