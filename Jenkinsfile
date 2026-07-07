@@ -75,6 +75,7 @@ pipeline {
     }
     post {
         always {
+            sh "chmod -R . jenkins"
             cleanWs()
         }
     }
