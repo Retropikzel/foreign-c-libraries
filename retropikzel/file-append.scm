@@ -1,0 +1,17 @@
+(define-c-library libc '("stdio.h") #f ())
+
+(define-c-procedure c-fopen libc 'fopen 'pointer '(pointer pointer))
+(define-c-procedure c-fputs libc 'fputs 'int '(pointer pointer))
+(define-c-procedure c-fclose libc 'fclose 'int '(pointer))
+
+(define (with-append-to-file path thunk)
+  (let* ((output (parameterize ((current-output-port (open-output-string)))
+                   (apply thunk '())
+                   (get-output-string (current-output-port))))
+         (mode-cbv (string->c-bytevector "a"))
+         (path-cbv (string->c-bytevector path))
+         (file-cbv (c-fopen path-cbv mode-cbv))
+         (output-cbv (string->c-bytevector output)))
+    (c-fputs output-cbv file-cbv)
+    (c-fclose file-cbv)
+    (c-bytevector-free mode-cbv path-cbv output-cbv)))
