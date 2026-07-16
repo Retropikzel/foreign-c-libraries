@@ -1,7 +1,6 @@
 (define-c-library libc '("stdio.h") #f ())
 
 (define-c-procedure c-fopen libc 'fopen 'pointer '(pointer pointer))
-;(define-c-procedure c-fputs libc 'fputs 'int '(pointer pointer))
 (define-c-procedure c-fputc libc 'fputc 'int '(int pointer))
 (define-c-procedure c-fclose libc 'fclose 'int '(pointer))
 

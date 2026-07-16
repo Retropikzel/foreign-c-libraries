@@ -81,8 +81,8 @@ test-docker: testfiles
 		DOCKER_TAG=${DOCKER_TAG} \
 		COMPILE_R7RS=${SCHEME} \
 		CSC_OPTIONS="${CSC_OPTIONS}" \
-		SNOW_PACKAGES="srfi.64 ${PKG}" \
-		AKKU_PACKAGES="akku-r7rs" \
+		SNOW_PACKAGES="srfi.64 foreign.c ${PKG}" \
+		AKKU_PACKAGES="akku-r7rs '(foreign c)' '(retropikzel ${LIBRARY})'" \
 		APT_PACKAGES="${APT_PACKAGES}" \
 		PASS_ENV_VARS="CSC_OPTIONS" \
 		test-r7rs ${LIB_PATHS} -o test-program test.${SFX}
