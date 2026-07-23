@@ -12,8 +12,10 @@
          (output (parameterize ((current-output-port (open-output-string)))
                    (apply thunk '())
                    (get-output-string (current-output-port))))
-         (output-cbv (string->c-bytevector output))
          (output-length (string-length output)))
-    (c-fwrite output-cbv 1 output-length file-cbv)
+    (with-string->c-bytevector
+      output
+      (lambda (output-cbv)
+        (c-fwrite output-cbv 1 output-length file-cbv)))
     (c-fclose file-cbv)
-    (c-bytevector-free path-cbv output-cbv)))
+    (c-bytevector-free path-cbv)))

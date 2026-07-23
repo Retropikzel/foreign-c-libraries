@@ -83,13 +83,13 @@
     ;copy-tty-info
     ;cppflags
     ;cpu-ticks/sec
-    ;create-directory
-    ;create-fifo
-    ;create-hard-link
+    create-directory
+    create-fifo
+    create-hard-link
     ;create-socket
     ;create-socket-pair
-    ;create-symlink
-    ;create-temp-file
+    create-symlink
+    create-temp-file
     ;crypt
     ;current-thread
     ;cwd
@@ -99,11 +99,11 @@
     ;default-lib-dirs
     ;define-record
     ;defs
-    ;delete-directory
-    ;delete-file
+    delete-directory
+    delete-file
     ;delete-filesys-object
     ;directory-as-file-name
-    ;directory-files
+    directory-files
     ;disable-tty-char
     ;drain-tty
     ;dump-scsh
@@ -138,8 +138,8 @@
     ;file-exists?
     ;file-fifo?
     ;file-group
-    ;file-info
-    ;file-info-directory?
+    file-info
+    file-info-directory?
     ;file-info-executable?
     ;file-info-fifo?
     ;file-info-not-executable?
@@ -151,17 +151,17 @@
     ;file-info-special?
     ;file-info-symlink?
     ;file-info-writable?
-    ;file-info:atime
-    ;file-info:ctime
-    ;file-info:device
-    ;file-info:gid
-    ;file-info:inode
-    ;file-info:mode
-    ;file-info:mtime
-    ;file-info:nlinks
-    ;file-info:size
+    file-info:atime
+    file-info:ctime
+    file-info:device
+    file-info:gid
+    file-info:inode
+    file-info:mode
+    file-info:mtime
+    ile-info:nlinks
+    file-info:size
     ;file-info:type
-    ;file-info:uid
+    file-info:uid
     ;file-inode
     ;file-last-access
     ;file-last-mod
@@ -208,10 +208,10 @@
     ;getenv
     ;glob
     ;glob-quote
-    ;group-info, [2]
-    ;group-info:gid
+    group-info
+    group-info:gid
     ;group-info:members
-    ;group-info:name
+    group-info:name
     ;handle-signal-default
     ;home-dir
     ;home-directory
@@ -311,7 +311,7 @@
     ;next-sigevent-set
     ;next-sigevent-set/no-wait
     ;next-sigevent/no-wait
-    ;nice
+    nice
     ;number->md5-digest
     ;obtain-dot-lock
     ;obtain-lock
@@ -329,7 +329,7 @@
     ;parse-sre
     ;parse-sres
     ;path-list->file-name
-    ;pid
+    pid
     ;pid->proc
     ;pipe
     ;placeholder-value
@@ -407,7 +407,7 @@
     ;read-string!
     ;read-string!/partial
     ;read-string/partial
-    ;read-symlink
+    read-symlink
     ;reap-zombies
     ;receive-message
     ;receive-message!
@@ -429,7 +429,7 @@
     ;release-lock
     ;release-port-handle
     ;relinquish-timeslice
-    ;rename-file
+    rename-file
     ;replace-extension
     ;resolve-file-name
     ;run
@@ -463,9 +463,9 @@
     ;set-fdes-flags
     ;set-fdes-status
     ;set-file-group
-    ;set-file-mode
-    ;set-file-owner
-    ;set-file-times
+    set-file-mode
+    set-file-owner
+    set-file-times
     ;set-gid
     ;set-interrupt-handler
     ;set-port-buffering
@@ -477,10 +477,10 @@
     ;set-tty-info/now
     ;set-tty-process-group
     ;set-uid
-    ;set-umask
+    set-umask
     ;set-user-effective-gid
     ;set-user-effective-uid
-    ;setenv
+    setenv
     ;shutdown-socket
     ;sigevent?
     ;signal->interrupt
@@ -578,7 +578,7 @@
     ;time
     ;time, [2]
     ;time+ticks
-    ;truncate-file
+    truncate-file
     ;tty-file-name
     ;tty-info
     ;tty-info record type
@@ -690,25 +690,25 @@
     ;ttyout/vtab-delay
     ;ttyout/vtab-delay0
     ;ttyout/vtab-delay1
-    ;umask
+    umask
     ;uname
     ;uncase
     ;uncase-char-set
     ;uncase-string
     ;unix-address->socket-address
     ;unlock-region
-    ;user-effective-gid
-    ;user-effective-uid
-    ;user-gid
-    ;user-info, [2]
-    ;user-info:gid
-    ;user-info:home-dir
-    ;user-info:name
-    ;user-info:shell
-    ;user-info:uid
+    user-effective-gid
+    user-effective-uid
+    user-gid
+    user-info
+    user-info:gid
+    user-info:home-dir
+    user-info:name
+    user-info:shell
+    user-info:uid
     ;user-login-name
     ;user-supplementary-gids
-    ;user-uid
+    user-uid
     ;vendor
     ;wait
     ;wait-any
