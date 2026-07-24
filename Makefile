@@ -4,14 +4,7 @@ DOCKER_TAG=latest
 RNRS=r7rs
 LIBRARY=system
 AUTHOR=Retropikzel
-tmpdir=.tmp/${SCHEME}/${LIBRARY}
 
-SFX=scm
-LIB_PATHS=
-ifeq "${RNRS}" "r6rs"
-SFX=sps
-LIB_PATHS=-I .akku/lib
-endif
 VERSION != cat retropikzel/${LIBRARY}/VERSION
 PACKAGE_ARGS != cat retropikzel/${LIBRARY}/PACKAGE_ARGS 2> /dev/null || echo ""
 CSC_OPTIONS != cat retropikzel/${LIBRARY}/CSC_OPTIONS 2> /dev/null || echo ""
@@ -55,37 +48,22 @@ ${PKG}: package
 install:
 	snow-chibi install --impls=${SCHEME} --always-yes ${PKG}
 
-testfiles: ${PKG}
-	rm -rf ${tmpdir}
-	mkdir -p ${tmpdir}
-	cp -r test-resources ${tmpdir}
-	# R6RS testfiles
-	printf "#!r6rs\n(import (except (rnrs) remove) (srfi :64) (foreign c) (retropikzel ${LIBRARY}))" > ${tmpdir}/test.sps
-	cat ${TESTFILE} >> ${tmpdir}/test.sps
-	# R7RS testfiles
-	echo "(import (scheme base) (scheme write) (scheme read) (scheme char) (scheme file) (scheme process-context) (srfi 64) (foreign c) (retropikzel ${LIBRARY}))" > ${tmpdir}/test.scm
-	cat ${TESTFILE} >> ${tmpdir}/test.scm
-	cp ${PKG} ${tmpdir}
+test:
+	rm -rf test-program
+	COMPILE_R7RS=${SCHEME} \
+	CSC_OPTIONS="${CSC_OPTIONS}" \
+	compile-r7rs -o test-program ${TESTFILE}
+	./test-program
 
-test: testfiles
-	cd ${tmpdir} && \
-		COMPILE_R7RS_DEBUG=1 \
-		COMPILE_R7RS=${SCHEME} \
-		CSC_OPTIONS="${CSC_OPTIONS}" \
-		compile-r7rs ${LIB_PATHS} -o test-program test.${SFX}
-	cd ${tmpdir} && ./test-program
-
-test-docker: testfiles
-	cd ${tmpdir} && \
-		TEST_R7RS_DEBUG=1 \
-		DOCKER_TAG=${DOCKER_TAG} \
-		COMPILE_R7RS=${SCHEME} \
-		CSC_OPTIONS="${CSC_OPTIONS}" \
-		SNOW_PACKAGES="srfi.64 foreign.c ${PKG}" \
-		AKKU_PACKAGES="akku-r7rs chez-srfi '(foreign c)' '(retropikzel ${LIBRARY})'" \
-		APT_PACKAGES="${APT_PACKAGES}" \
-		PASS_ENV_VARS="CSC_OPTIONS" \
-		test-r7rs ${LIB_PATHS} -o test-program test.${SFX}
+test-docker:
+	DOCKER_TAG=${DOCKER_TAG} \
+	COMPILE_R7RS=${SCHEME} \
+	CSC_OPTIONS="${CSC_OPTIONS}" \
+	SNOW_PACKAGES="srfi.64 foreign.c ${PKG}" \
+	AKKU_PACKAGES="akku-r7rs chez-srfi '(foreign c)' '(retropikzel ${LIBRARY})'" \
+	APT_PACKAGES="${APT_PACKAGES}" \
+	PASS_ENV_VARS="CSC_OPTIONS" \
+		test-r7rs -o test-program ${TESTFILE}
 
 clean:
 	git clean -X -f

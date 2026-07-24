@@ -26,3 +26,4 @@ venv
 foreign
 tmp
 *.json
+test-program

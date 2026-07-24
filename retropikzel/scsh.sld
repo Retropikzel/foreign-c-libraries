@@ -3,6 +3,7 @@
   (import (scheme base)
           (scheme write)
           (scheme file)
+          (scheme process-context)
           (foreign c)
           (srfi 170))
   (export
@@ -205,8 +206,8 @@
     ;fork/pipe+
     ;format-date
     ;get-lock-region
-    ;getenv
-    ;glob
+    getenv
+    glob
     ;glob-quote
     group-info
     group-info:gid
@@ -745,4 +746,6 @@
     ;write-string
     ;write-string/partial
     )
-  (include "scsh.scm"))
+  (cond-expand
+    (windows (begin (error "Windows not supported")))
+    (else (include "scsh.unix.scm"))))
