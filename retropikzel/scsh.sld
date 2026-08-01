@@ -9,6 +9,7 @@
           (retropikzel dot-locking)
           (retropikzel debug)
           (foreign c)
+          (chibi pathname)
           (srfi 14)
           (srfi 19)
           (srfi 60)
@@ -115,7 +116,7 @@
     ;field-splitter
     ;file-directory? ;; FIXME
     ;file-executable?
-    ;file-exists?
+    file-exists?
     ;file-fifo?
     ;file-group
     file-info
@@ -142,34 +143,33 @@
     ;file-info:type
     file-info:uid
     ;file-inode
-    ;file-last-access
-    ;file-last-mod
-    ;file-last-status-change
+    file-last-access
+    file-last-mod
+    file-last-status-change
     ;file-match
-    ;file-mode
-    ;file-name-absolute?
-    ;file-name-as-directory
-    ;file-name-directory
-    ;file-name-directory?
-    ;file-name-extension
-    ;file-name-non-directory?
-    ;file-name-nondirectory
-    ;file-name-sans-extension
-    ;file-nlinks
+    file-mode
+    file-name-absolute?
+    file-name-as-directory
+    file-name-directory
+    file-name-directory?
+    file-name-extension
+    file-name-non-directory?
+    file-name-nondirectory
+    file-name-sans-extension
+    file-nlinks
     ;file-not-executable?
     ;file-not-exists?
     ;file-not-readable?
     ;file-not-writable?
-    ;file-owner
+    file-owner
     ;file-readable?
     ;file-regular?
-    ;file-size
+    file-size
     ;file-special?
     ;file-symlink?
     ;file-type
     ;file-writable?
     ;fill-in-date!
-    ;find-library-file
     ;flush-all-ports
     ;flush-submatches
     ;flush-tty/both
@@ -181,7 +181,6 @@
     ;fork-thread
     ;fork/pipe
     ;fork/pipe+
-    ;format-date
     ;get-lock-region
     getenv
     glob
@@ -192,9 +191,9 @@
     group-info:name
     ;handle-signal-default
     ;home-dir ;;FIXME
-    ;home-directory
-    ;home-file
-    ;host
+    home-directory
+    ;home-file ;; FIXME
+    host
     ;if-match
     ;if-sre-form
     ;ignore-signal
@@ -225,13 +224,7 @@
     ;interrupt/xcpu
     ;interrupt/xfsz
     ;itimer
-    ;join-strings
-    ;ldflags
     ;let-match
-    ;lib-dirs
-    ;lib-dirs-list
-    ;libs
-    ;linker-flags
     ;lock-owner-uid
     ;lock-region
     ;lock-region/no-block
@@ -244,11 +237,10 @@
     ;lock-region?
     ;lock?
     ;machine
-    ;make-char-port-filter
-    ;make-date
+    make-char-port-filter
     ;make-lock
     ;make-lock-region
-    ;make-md5-context
+    ;make-md5-context ;; TODO (chibi md5)
     ;make-placeholder
     ;make-pty-generator
     ;make-re-char-set
@@ -258,10 +250,10 @@
     ;make-re-seq
     ;make-re-string
     ;make-re-submatch
-    ;make-regexp
-    ;make-string-input-port
-    ;make-string-output-port
-    ;make-string-port-filter
+    ;make-regexp ;; TODO (chibi irregex)
+    make-string-input-port
+    make-string-output-port
+    make-string-port-filter
     ;make-syslog-mask
     ;make-syslog-options
     ;make-tty-info
@@ -287,15 +279,14 @@
     obtain-dot-lock
     ;obtain-lock
     ;open-control-tty
-    ;open-directory-stream
+    ;open-directory-stream ;; TODO C
     ;open-fdes
-    ;open-file
-    ;open-input-file
-    ;open-output-file
+    open-input-file
+    open-output-file
     ;open-pty
     ;open-syslog-channel
-    ;os
-    ;parent-pid
+    os
+    parent-pid
     ;parse-file-name
     ;parse-sre
     ;parse-sres

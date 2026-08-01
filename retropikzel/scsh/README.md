@@ -29,14 +29,20 @@ the scsh code does not. So this it returns a list of strings. Similarily
 env->alist takes string as argument and returns alist instead of writing to env.
 Check tests for examples.
 
+### process-sleep
+
+Same as sleep except instead of milliseconds uses seconds.
+
 
 ### No SRFI's by default
 
-SRFI's that come with scsh proper are not included. See snow-fort for them, or
-your implementation.
+SRFI's that come with scsh proper are not included. See snow-fort or your
+Scheme implementation for them.
 
 
 ### No scsh specifics
+
+Not very usefull for library implementation or not possible to do.
 
 - bin-dir
 - prefix
@@ -53,9 +59,18 @@ your implementation.
 - defs
 - dump-scsh
 - dump-scsh-program
+- find-library-file
+- ldflags
+- lib-dirs
+- lib-dirs-list
+- libs
+- linker-flags
+- open-file
 
 
 ### No sockets
+
+Since this implementation of scsh is library you can get them as library elsewhere.
 
 - accept-connection
 - bind-listen-accept-loop
@@ -79,8 +94,6 @@ your implementation.
 - receive-message!/partial
 - receive-message/partial
 
-Since this implementation of scsh is library you can get them as library elsewhere.
-
 
 ### No threads
 
@@ -97,10 +110,16 @@ Since this implementation of scsh is library you can get them as library elsewhe
 
 ### No date/time
 
+Since this implementation of scsh is library you can get them as library elsewhere.
+
 - date
 - date->string
+- format-date
+- make-date
 
 
-### process-sleep
+### No string utilities
 
-Same as sleep except instead of milliseconds uses seconds.
+Since this implementation of scsh is library you can get them as library elsewhere.
+
+- join-strings

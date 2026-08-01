@@ -264,3 +264,133 @@
 
 (define (error-output-port) (current-error-port))
 
+(define (file-last-access fname/port follow?)
+  (let* ((fi (file-info fname/port follow?)))
+    (file-info:atime fi)))
+
+(define (file-last-mod fname/port follow?)
+  (let* ((fi (file-info fname/port follow?)))
+    (file-info:mtime fi)))
+
+(define (file-last-status-change fname/port follow?)
+  (let* ((fi (file-info fname/port follow?)))
+    (file-info:ctime fi)))
+
+(define (file-mode fname/port follow?)
+  (let* ((fi (file-info fname/port follow?)))
+    (file-info:mode fi)))
+
+(define (file-name-absolute? fname)
+  (when (not (string? fname))
+    (error "file-name-absolute? error: fname must be string" fname))
+  (if (string=? fname "")
+    #t
+    (path-absolute? fname)))
+
+(define (file-name-as-directory fname)
+  (when (not (string? fname))
+    (error "file-name-as-directory error: fname must be string" fname))
+  (cond ((string=? fname ".") "")
+        ((string=? fname "/") "/")
+        ((string=? fname "") "/")
+        ((char=? (string-ref fname (- (string-length fname) 1)) #\/) fname)
+        (else (string-append fname "/"))))
+
+(define (file-name-directory fname)
+  (when (not (string? fname))
+    (error "file-name-directory error: fname must be string" fname))
+  (cond ((string=? fname "/") "")
+        ((string=? fname "") "")
+        (else
+          (let ((chibi-path (path-directory fname)))
+            (if (string=? chibi-path ".")
+              ""
+              chibi-path)))))
+
+(define (file-name-directory? fname)
+  (when (not (string? fname))
+    (error "file-name-directory? error: fname must be string" fname))
+  (cond ((string=? fname "/") #t)
+        ((string=? fname ".") #f)
+        ((string=? fname "") #t)
+        (else (char=? (string-ref fname (- (string-length fname) 1)) #\/))))
+
+(define (file-name-extension fname)
+  (when (not (string? fname))
+    (error "file-name-extension error: fname must be string" fname))
+  (let ((extension (path-extension fname)))
+    (if extension (string-append "." extension) "")))
+
+(define (file-name-non-directory? fname)
+  (when (not (string? fname))
+    (error "file-name-non-directory? error: fname must be string" fname))
+  (if (string=? fname "") #t (not (file-name-directory? fname))))
+
+(define (file-name-sans-extension fname)
+  (when (not (string? fname))
+    (error "file-name-sans-extension error: fname must be string" fname))
+  (path-strip-extension fname))
+
+(define (file-nlinks fname/port follow?)
+  (let* ((fi (file-info fname/port follow?)))
+    (file-info:nlinks fi)))
+
+(define (file-owner fname/port follow?)
+  (let* ((fi (file-info fname/port follow?)))
+    (file-info:uid fi)))
+
+(define (file-size fname/port follow?)
+  (let* ((fi (file-info fname/port follow?)))
+    (file-info:size fi)))
+
+(define home-directory (get-environment-variable "HOME"))
+
+(define home-file
+  (lambda args
+    (when (and (= (length args) 1) (not (string? (list-ref args 0))))
+      (error "home-file error: fname must be string"))
+    (when (and (= (length args) 2) (not (string? (list-ref args 0))))j
+      (error "home-file error: user must be string"))
+    (when (and (= (length args) 2) (not (string? (list-ref args 1))))
+      (error "home-file error: user must be string"))
+    (let ((dir (if (= (length args) 2)
+                 (home-dir (list-ref args 0))
+                 (home-dir)))
+          (fname (if (= (length args) 2)
+                   (home-dir (list-ref args 1))
+                   (home-dir))))
+      (string-append dir "/" fname))))
+
+(define (make-char-port-filter filter)
+  (lambda ()
+    (letrec* ((looper (lambda (c)
+                        (when (not (eof-object? c))
+                          (write-char (filter c))
+                          (looper (read-char))))))
+      (looper (read-char)))))
+
+(define (make-string-input-port str) (open-input-string str))
+
+(define (make-string-output-port str) (open-output-string str))
+
+(define (make-string-port-filter filter . args)
+  (lambda ()
+    (letrec* ((buflen
+                (cond ((and (= (length args) 1)
+                            (not (integer? (list-ref args 0))))
+                       (error (string-append "make-string-port-filter error:"
+                                             " buflen must be integer" )))
+                      ((and (= (length args) 1)) (list-ref args 0))
+                      (else 1024)))
+              (looper (lambda (str)
+                        (when (not (eof-object? str))
+                          (display (filter str))
+                          (looper (read-string buflen))))))
+      (looper (read-string buflen)))))
+
+(define (os)
+  (cond-expand
+    (linux 'linux)
+    (freebsd 'freesdb)
+    (netbsd 'netbsd)
+    (else 'unix)))

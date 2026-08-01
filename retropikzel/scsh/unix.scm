@@ -117,7 +117,7 @@
 (define-c-procedure c-chdir libc 'chdir 'int '(pointer))
 (define chdir
   (lambda args
-    (let ((fname (if (null? args) (home-dir) (car args))))
+    (let ((fname (if (null? args) home-directory (car args))))
       (when (not (string? fname)) (error "chdir error: fname must be string"))
       (let* ((fname* (string->c-bytevector fname))
              (result (c-chdir fname*)))
@@ -186,3 +186,8 @@
           (error "home-dir error: home directory not found, user does not exist?"
                  user))
         home-dir-path))))
+
+(define (host) (with-input-from-file "/etc/hostname" (lambda () (read-line))))
+
+(define-c-procedure c-getppid libc 'getppid 'int '())
+(define (parent-pid) (c-getppid))
