@@ -1,15 +1,22 @@
 (define-library
   (retropikzel scsh)
   (import (scheme base)
+          (scheme read)
           (scheme write)
           (scheme file)
+          (scheme char)
           (scheme process-context)
+          (retropikzel dot-locking)
+          (retropikzel debug)
           (foreign c)
+          (srfi 14)
+          (srfi 19)
+          (srfi 60)
           (srfi 170))
   (export
-    ;*temp-file-template*
-    ;->uid
-    ;->username
+    *temp-file-template*
+    ->uid
+    ->username
     ;%exec
     ;%exit
     ;%fork
@@ -19,104 +26,77 @@
     ;&
     ;&
     ;&&
-    ;reduce-port
-    ;absolute-file-name
-    ;accept-connection
-    ;add-after
-    ;add-before
-    ;alist->env
-    ;alist-compress
-    ;alist-delete
-    ;alist-update
-    ;arg
-    ;arg*
-    ;argv
-    ;arithmetic-shift
+    reduce-port
+    absolute-file-name
+    add-after
+    add-before
+    alist->env
+    alist-compress
+    alist-delete
+    alist-update
+    arg
+    arg*
+    argv
+    arithmetic-shift
     ;ascii->char
-    ;autoreap-policy
+    autoreap-policy
     ;awk
-    ;become-session-leader
-    ;bin-dir
-    ;bind-listen-accept-loop
-    ;bind-prepare-listen-accept-loop
-    ;bind-socket
-    ;bitwise-and
-    ;bitwise-ior
-    ;bitwise-not
-    ;bitwise-xor
-    ;break-dot-lock
-    ;bufpol/block
-    ;bufpol/line
-    ;bufpol/none
-    ;call-terminally
-    ;call-with-string-output-port
+    become-session-leader
+    bitwise-and
+    bitwise-ior
+    bitwise-not
+    bitwise-xor
+    break-dot-lock
+    call-terminally
+    call-with-string-output-port
     ;call/fdes
-    ;cflags
     ;char->ascii
-    ;char-ascii?
-    ;char-blank?
-    ;char-digit?
-    ;char-graphic?
-    ;char-hex-digit?
-    ;char-iso-control?
-    ;char-letter+digit?
-    ;char-letter?
-    ;char-lower-case?
-    ;char-printing?
-    ;char-punctuation?
-    ;char-title-case?
-    ;char-upper-case?
-    ;char-whitespace?
-    ;chdir
-    ;clean-up-cres
+    char-ascii?
+    char-blank?
+    char-digit?
+    char-graphic?
+    char-hex-digit?
+    char-iso-control?
+    char-letter+digit?
+    char-letter?
+    char-lower-case?
+    char-printing?
+    char-punctuation?
+    char-title-case?
+    char-upper-case?
+    char-whitespace?
+    ;chdir ;; FIXME
     ;close
     ;close-after
     ;close-directory-stream
-    ;close-socket
     ;close-syslog-channel
-    ;command-line
-    ;command-line-arguments
-    ;compiler-flags
-    ;connect-socket
-    ;connect-socket-no-wait
-    ;connect-socket-successful?
+    command-line
+    command-line-arguments
     ;control-tty-file-name
     ;copy-tty-info
-    ;cppflags
     ;cpu-ticks/sec
     create-directory
     create-fifo
     create-hard-link
-    ;create-socket
-    ;create-socket-pair
     create-symlink
     create-temp-file
     ;crypt
-    ;current-thread
-    ;cwd
-    ;date, [2]
-    ;date, [2]
-    ;date->string
-    ;default-lib-dirs
-    ;define-record
-    ;defs
+    ;cwd ;; FIXME
     delete-directory
     delete-file
-    ;delete-filesys-object
-    ;directory-as-file-name
+    ;delete-filesys-object ;; FIXME
+    directory-as-file-name
     directory-files
     ;disable-tty-char
     ;drain-tty
-    ;dump-scsh
-    ;dump-scsh-program
     ;dup
     ;dup->fdes
     ;dup->inport
     ;dup->outport
     ;enabled-interrupts
-    ;env->alist
+    env->alist
     ;errno-error
-    ;error-output-port
+    error-output-port
     ;exec
     ;exec-epf
     ;exec-epf
@@ -124,7 +104,6 @@
     ;exec-path-list
     ;exec-path-search
     ;exec-path/env
-    ;exec-prefix
     ;exec/env
     exit
     ;expand-file-name
@@ -134,7 +113,7 @@
     ;fdes-status
     ;field-reader
     ;field-splitter
-    ;file-directory?
+    ;file-directory? ;; FIXME
     ;file-executable?
     ;file-exists?
     ;file-fifo?
@@ -148,7 +127,6 @@
     ;file-info-not-writable?
     ;file-info-readable?
     ;file-info-regular?
-    ;file-info-socket?
     ;file-info-special?
     ;file-info-symlink?
     ;file-info-writable?
@@ -159,7 +137,7 @@
     file-info:inode
     file-info:mode
     file-info:mtime
-    ile-info:nlinks
+    file-info:nlinks
     file-info:size
     ;file-info:type
     file-info:uid
@@ -186,7 +164,6 @@
     ;file-readable?
     ;file-regular?
     ;file-size
-    ;file-socket?
     ;file-special?
     ;file-symlink?
     ;file-type
@@ -208,23 +185,20 @@
     ;get-lock-region
     getenv
     glob
-    ;glob-quote
+    glob-quote
     group-info
     group-info:gid
     ;group-info:members
     group-info:name
     ;handle-signal-default
-    ;home-dir
+    ;home-dir ;;FIXME
     ;home-directory
     ;home-file
     ;host
-    ;host-info
     ;if-match
     ;if-sre-form
     ;ignore-signal
-    ;include-dir
     ;infix-splitter
-    ;internet-address->socket-address
     ;interrupt-handler
     ;interrupt-set
     ;interrupt/alarm
@@ -254,12 +228,10 @@
     ;join-strings
     ;ldflags
     ;let-match
-    ;lib-dir
     ;lib-dirs
     ;lib-dirs-list
     ;libs
     ;linker-flags
-    ;listen-socket
     ;lock-owner-uid
     ;lock-region
     ;lock-region/no-block
@@ -293,7 +265,6 @@
     ;make-syslog-mask
     ;make-syslog-options
     ;make-tty-info
-    ;man-dir
     ;match-cond
     ;match:end
     ;match:start
@@ -307,14 +278,13 @@
     ;md5-digest?
     ;most-recent-sigevent
     ;move->fdes
-    ;network-info
     ;next-sigevent
     ;next-sigevent-set
     ;next-sigevent-set/no-wait
     ;next-sigevent/no-wait
     nice
     ;number->md5-digest
-    ;obtain-dot-lock
+    obtain-dot-lock
     ;obtain-lock
     ;open-control-tty
     ;open-directory-stream
@@ -338,19 +308,17 @@
     ;port->fdes
     ;port->list
     ;port->sexp-list
-    ;port->socket
     ;port->string
     ;port->string-list
-    ;port-fold
+    port-fold
     ;port-revealed
     ;posix-string->regexp
-    ;prefix
     ;priority
     ;proc
     ;proc:pid
     ;proc?
     ;process-group
-    ;process-sleep
+    process-sleep
     ;process-sleep-until
     ;process-times
     ;protocol-info
@@ -410,10 +378,6 @@
     ;read-string/partial
     read-symlink
     ;reap-zombies
-    ;receive-message
-    ;receive-message!
-    ;receive-message!/partial
-    ;receive-message/partial
     ;record-reader
     ;regexp->posix-string
     ;regexp->scheme
@@ -426,7 +390,7 @@
     ;regexp-substitute
     ;regexp-substitute/global
     ;regexp?, [2]
-    ;release-dot-lock
+    release-dot-lock
     ;release-lock
     ;release-port-handle
     ;relinquish-timeslice
@@ -521,10 +485,10 @@
     ;signal/winch
     ;signal/xcpu
     ;signal/xfsz
-    ;simplify-file-name
+    simplify-file-name
     ;simplify-regexp
     ;skip-char-set
-    ;sleep
+    sleep
     ;sloppy-suffix-splitter
     ;socket-address->internet-address
     ;socket-address->unix-address
@@ -720,8 +684,8 @@
     ;with-current-output-port*
     ;with-cwd
     ;with-cwd*
-    ;with-dot-lock
-    ;with-dot-lock*
+    with-dot-lock
+    with-dot-lock*
     ;with-enabled-interrupts
     ;with-enabled-interrupts*
     ;with-env
@@ -746,6 +710,8 @@
     ;write-string
     ;write-string/partial
     )
+  (include "scsh/util.scm")
+  (include "scsh/portable.scm")
   (cond-expand
     (windows (begin (error "Windows not supported")))
-    (else (include "scsh.unix.scm"))))
+    (else (include "scsh/unix.scm"))))

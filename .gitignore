@@ -27,3 +27,5 @@ foreign
 tmp
 *.json
 test-program
+*.test
+*.test1

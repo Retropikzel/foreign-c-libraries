@@ -59,7 +59,7 @@ test-docker:
 	DOCKER_TAG=${DOCKER_TAG} \
 	COMPILE_R7RS=${SCHEME} \
 	CSC_OPTIONS="${CSC_OPTIONS}" \
-	SNOW_PACKAGES="srfi.64 foreign.c ${PKG}" \
+	SNOW_PACKAGES="srfi.14 srfi.19 srfi.64 srfi.170 retropikzel.tap retropikzel.dot-locking retropikzel.debug foreign.c ${PKG}" \
 	AKKU_PACKAGES="akku-r7rs chez-srfi '(foreign c)' '(retropikzel ${LIBRARY})'" \
 	APT_PACKAGES="${APT_PACKAGES}" \
 	PASS_ENV_VARS="CSC_OPTIONS" \
