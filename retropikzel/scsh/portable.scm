@@ -354,14 +354,14 @@
 
 (define home-file
   (lambda args
-    (when (and (= (length args) 1) (not (string? (list-ref args 0))))
+    (when (and (= (length args) 1) (not (string? (car args))))
       (error "home-file error: fname must be string"))
     (when (and (= (length args) 2) (not (string? (list-ref args 0))))j
       (error "home-file error: user must be string"))
     (when (and (= (length args) 2) (not (string? (list-ref args 1))))
       (error "home-file error: user must be string"))
     (let ((dir (if (= (length args) 2)
-                 (home-dir (list-ref args 0))
+                 (home-dir (car args))
                  (home-dir)))
           (fname (if (= (length args) 2)
                    (home-dir (list-ref args 1))
@@ -384,10 +384,10 @@
   (lambda ()
     (letrec* ((buflen
                 (cond ((and (= (length args) 1)
-                            (not (integer? (list-ref args 0))))
+                            (not (integer? (car args))))
                        (error (string-append "make-string-port-filter error:"
                                              " buflen must be integer" )))
-                      ((and (= (length args) 1)) (list-ref args 0))
+                      ((and (= (length args) 1)) (car args))
                       (else 1024)))
               (looper (lambda (str)
                         (when (not (eof-object? str))
@@ -415,15 +415,15 @@
   (let ((path (string-join path-list "/")))
   (cond ((null? path-list) "")
         ((and (not (null? args))
-              (string=? (list-ref args 0) ""))
+              (string=? (car args) ""))
          (string-append "/" path))
         ((and (not (null? args))
-              (not (string? (list-ref args 0))))
+              (not (string? (car args))))
          (error "path-list->file-name error: dir must be string"
-                (list-ref args 0)))
+                (car args)))
         ((and (not (null? args))
-              (string? (list-ref args 0)))
-         (string-append (file-name-as-directory (list-ref args 0)) path))
+              (string? (car args)))
+         (string-append (file-name-as-directory (car args)) path))
         (else path))))
 
 (define (port->list reader port)
@@ -439,26 +439,87 @@
                                   (looper (read-string 1024 port)))))))
     (looper (read-string 1024 port))))
 
-(define (port->string-list port) (reverse (port-fold port read-line cons '())))
+(define (port->string-list port) (reverse (port-fold port r7rs-read-line cons '())))
 
 (define (read-delimited char-set . args)
+
   (when (and (not (string? char-set))
              (not (char-set? char-set)))
-    (error (string-append "read-delimited error: read-delimited char-set must"
-                          " be either string or char-set")))
+    (error (string-append "read-delimited error: char-set must be either"
+                          " string or char-set")))
+
+  (when (and (> (length args) 0)
+             (not (port? (car args))))
+    (error (string-append "read-delimited error: port must of type port")))
+
+  (when (and (> (length args) 1)
+             (not (member (list-ref args 1) '(trim peek concat split))))
+    (error (string-append "read-delimited error: handle-delim must be either"
+                          " 'trim, 'peek, 'concat or 'split")
+           (list-ref args 1)))
+
   (letrec* ((character-set (if (string? char-set)
                              (string->char-set char-set)
                              char-set))
-            (port (if (>= (length args) 1)
-                    (car args)
-                    (current-input-port)))
+            (port (if (> (length args) 0) (car args) (current-input-port)))
+            (handle-delim (if (> (length args) 1) (list-ref args 1) 'trim))
             (result '())
+            (in-char-set? (lambda (c) (char-set-contains? character-set c)))
             (looper (lambda (c)
-                      (cond ((char-set-contains? character-set c)
-                             (list->string (reverse result)))
+                      (cond ((in-char-set? c)
+                             (cond ((equal? handle-delim 'trim)
+                                    (list->string (reverse result)))
+                                   ((equal? handle-delim 'concat)
+                                    (list->string (reverse (cons c result))))
+                                   ((equal? handle-delim 'split)
+                                    (values (list->string (reverse result)) c))))
+                            ((and (equal? handle-delim 'peek)
+                                  (in-char-set? (peek-char port)))
+                             (list->string (reverse (cons c result))))
                             (else (set! result (cons c result))
                                   (looper (read-char port)))))))
     (looper (read-char port))))
 
+(define read-line
+  (lambda args
+
+    (when (and (> (length args) 0)
+               (not (port? (car args))))
+      (error (string-append "read-delimited error: port must of type port")))
+
+    (when (and (> (length args) 1)
+               (not (member (list-ref args 1) '(trim peek concat split))))
+      (error (string-append "read-line error: handle-delim must be either"
+                            " 'trim, 'peek, 'concat or 'split")
+             (list-ref args 1)))
+
+    (apply read-delimited (cons (string #\newline) args))))
+
+#| TODO
+(define read-paragraph
+  (lambda args
+
+    (when (and (> (length args) 0)
+               (not (port? (car args))))
+      (error (string-append "read-delimited error: port must of type port")))
+
+    (when (and (> (length args) 1)
+               (not (member (list-ref args 1) '(trim concat split))))
+      (error (string-append "read-paragraph error: handle-delim must be either"
+                            " 'trim, 'concat or 'split (peek not supported)")
+             (list-ref args 1)))
+
+    (letrec*
+      ((port (if (> (length args) 0) (car args) (current-input-port)))
+       (handle-delim (if (> (length args) 1) (list-ref args 1) 'trim))
+       (result '())
+       (skipped-blank-lines? #f)
+       (looper (lambda (line)
+                 (cond ((and (eof-object? line) (null? result)) line)
+                       ((and (not skipped-blank-lines?) (string=? line ""))
+                        (looper (read-line port handle-delim)))
 
 
+    ))
+
+|#

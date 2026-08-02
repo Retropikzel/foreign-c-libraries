@@ -1,6 +1,7 @@
 (define-library
   (retropikzel scsh)
-  (import (scheme base)
+  (import (rename (scheme base)
+                  (read-line r7rs-read-line))
           (scheme read)
           (scheme write)
           (scheme file)
@@ -262,12 +263,14 @@
     ;match:start
     ;match:substring
     ;maybe-obtain-lock
+    ;; TODO (chibi md5) begin
     ;md5-context->md5-digest
     ;md5-context?
     ;md5-digest->number
     ;md5-digest-for-port
     ;md5-digest-for-string
     ;md5-digest?
+    ;; TODO (chibi md5) end
     ;most-recent-sigevent
     ;move->fdes
     ;next-sigevent
@@ -281,8 +284,8 @@
     ;open-control-tty
     ;open-directory-stream ;; TODO C
     ;open-fdes
-    open-input-file
-    open-output-file
+    ;open-input-file ;; TODO Different from R7RS
+    ;open-output-file ;; TODO Different from R7RS
     ;open-pty
     ;open-syslog-channel
     os
@@ -361,8 +364,8 @@
     read-delimited
     ;read-delimited!
     ;read-directory-stream
-    ;read-line
-    ;read-paragraph
+    read-line
+    ;read-paragraph ;; IN PROGRESS
     ;read-string
     ;read-string!
     ;read-string!/partial

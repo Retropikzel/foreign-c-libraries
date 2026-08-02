@@ -36,8 +36,8 @@
                                                       0
                                                       username-length)))
                         (string->number (list-ref (string-split line #\:) 2))
-                        (looper (read-line))))))))
-       (with-input-from-file "/etc/passwd" (lambda () (looper (read-line))))))
+                        (looper (r7rs-read-line))))))))
+       (with-input-from-file "/etc/passwd" (lambda () (looper (r7rs-read-line))))))
     (else (error (string-append "->uid error: uid/username must be either"
                                 " exact integer or string")))))
 
@@ -55,8 +55,8 @@
                                    (= (string->number (list-ref line-list 2))
                                       uid/username))
                             (car line-list)
-                            (looper (read-line))))))))
-           (with-input-from-file "/etc/passwd" (lambda () (looper (read-line))))))
+                            (looper (r7rs-read-line))))))))
+           (with-input-from-file "/etc/passwd" (lambda () (looper (r7rs-read-line))))))
         (else (error (string-append "->username error: uid/username must be either"
                                     " exact integer or string")))))
 
@@ -178,16 +178,16 @@
                                                        0
                                                        username-length)))
                            (list-ref (string-split line #\:) 5)
-                         (looper (read-line)))))))
+                         (looper (r7rs-read-line)))))))
          (home-dir-path (with-input-from-file
                           "/etc/passwd"
-                          (lambda () (looper (read-line))))))
+                          (lambda () (looper (r7rs-read-line))))))
         (when (not home-dir-path)
           (error "home-dir error: home directory not found, user does not exist?"
                  user))
         home-dir-path))))
 
-(define (host) (with-input-from-file "/etc/hostname" (lambda () (read-line))))
+(define (host) (with-input-from-file "/etc/hostname" (lambda () (r7rs-read-line))))
 
 (define-c-procedure c-getppid libc 'getppid 'int '())
 (define (parent-pid) (c-getppid))

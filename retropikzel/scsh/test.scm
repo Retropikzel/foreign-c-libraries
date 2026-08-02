@@ -500,7 +500,27 @@
                                   (open-input-string "foo1bar2baz3")))
 (test-equal "foo" (read-delimited char-set:digit
                                   (open-input-string "foo1bar2baz3")))
+(test-equal "foo" (read-delimited char-set:digit
+                                  (open-input-string "foo1bar2baz3")
+                                  'trim))
+(let ((port (open-input-string "foo1bar2baz3")))
+  (test-equal "foo" (read-delimited char-set:digit port 'peek))
+  (test-equal #\1 (read-char port)))
+(test-equal "foo1" (read-delimited char-set:digit
+                                  (open-input-string "foo1bar2baz3")
+                                  'concat))
 (test-end "read-delimited")
+
+
+(test-begin "read-line")
+(test-equal "foo" (read-line (open-input-string "foo\nbar\nbaz\n")))
+(test-equal "foo" (read-line (open-input-string "foo\nbar\nbaz\n")))
+(test-equal "foo" (read-line (open-input-string "foo\nbar\nbaz\n") 'trim))
+(let ((port (open-input-string "foo\nbar\nbaz\n")))
+  (test-equal "foo" (read-line port 'peek))
+  (test-equal #\newline (read-char port)))
+(test-equal "foo\n" (read-line (open-input-string "foo\nbar\nbaz\n") 'concat))
+(test-end "read-line")
 
 
 (test-end "scsh")
