@@ -287,20 +287,20 @@
     ;open-syslog-channel
     os
     parent-pid
-    ;parse-file-name
+    parse-file-name
     ;parse-sre
     ;parse-sres
-    ;path-list->file-name
+    path-list->file-name
     pid
     ;pid->proc
     ;pipe
     ;placeholder-value
     ;placeholder?
     ;port->fdes
-    ;port->list
-    ;port->sexp-list
-    ;port->string
-    ;port->string-list
+    port->list
+    port->sexp-list
+    port->string
+    port->string-list
     port-fold
     ;port-revealed
     ;posix-string->regexp
@@ -358,7 +358,7 @@
     ;re-trivial
     ;re-trivial?
     ;re-tsm
-    ;read-delimited
+    read-delimited
     ;read-delimited!
     ;read-directory-stream
     ;read-line

@@ -7,6 +7,7 @@
         (retropikzel scsh)
         (retropikzel tap)
         (retropikzel debug)
+        (srfi 14)
         (srfi 19)
         (srfi 64))
 
@@ -338,9 +339,15 @@
 
 
 (test-begin "file-name-directory")
-(test-equal "/tmp" (file-name-directory "/tmp/hello.txt"))
+(test-equal "/tmp/" (file-name-directory "/tmp/hello.txt"))
 (test-equal "" (file-name-directory "hello.txt"))
-(test-equal "lol" (file-name-directory "lol/hello.txt"))
+(test-equal "lol/" (file-name-directory "lol/hello.txt"))
+(test-equal "" (file-name-directory ""))
+(test-equal "/usr/" (file-name-directory "/usr/bdc"))
+(test-equal "/usr/bdc/" (file-name-directory "/usr/bdc/"))
+(test-equal "bdc/" (file-name-directory "bdc/.login"))
+(test-equal "" (file-name-directory "main.c"))
+(test-equal "" (file-name-directory "/"))
 (test-equal "" (file-name-directory ""))
 (test-end "file-name-directory")
 
@@ -369,6 +376,15 @@
 (test-assert (file-name-non-directory? "/tmp"))
 (test-end "file-name-non-directory?")
 
+
+(test-begin "file-name-nondirectory")
+(test-equal "ian" (file-name-nondirectory "/usr/ian"))
+(test-equal "" (file-name-nondirectory "/usr/ian/"))
+(test-equal ".login" (file-name-nondirectory "ian/.login"))
+(test-equal "main.c" (file-name-nondirectory "main.c"))
+(test-equal "" (file-name-nondirectory ""))
+(test-equal "/" (file-name-nondirectory "/"))
+(test-end "file-name-nondirectory")
 
 (test-begin "file-name-sans-extension")
 (test-equal "foo" (file-name-sans-extension "foo.bar"))
@@ -442,6 +458,49 @@
 (test-begin "parent-pid")
 (test-assert (number? (parent-pid)))
 (test-end "parent-pid")
+
+
+(test-begin "parse-file-name")
+(test-equal '("/tmp/" "foo" ".bar") (parse-file-name "/tmp/foo.bar"))
+(test-end "parse-file-name")
+
+
+(test-begin "path-list->file-name")
+(test-equal "src/des/main.c" (path-list->file-name '("src" "des" "main.c")))
+(test-equal "/src/des/main.c" (path-list->file-name '("" "src" "des" "main.c")))
+(test-equal "/usr/shivers/src/des/main.c"
+            (path-list->file-name '("src" "des" "main.c") "/usr/shivers"))
+(test-end "path-list->file-name")
+
+
+(test-begin "port->list")
+(test-equal '(foo bar baz) (port->list read (open-input-string "foo bar baz")))
+(test-end "port->list")
+
+
+(test-begin "port->sexp-list")
+(test-equal '(foo bar baz (1 2 3))
+            (port->sexp-list (open-input-string "foo bar baz (1 2 3)")))
+(test-end "port->sexp-list")
+
+
+(test-begin "port->string")
+(test-equal "1 2 3 (1 2 3)" (port->string (open-input-string "1 2 3 (1 2 3)")))
+(test-end "port->string")
+
+
+(test-begin "port->string-list")
+(test-equal '("foo" "bar" "baz")
+            (port->string-list (open-input-string "foo\nbar\nbaz\n")))
+(test-end "port->string-list")
+
+
+(test-begin "read-delimited")
+(test-equal "foo" (read-delimited "1"
+                                  (open-input-string "foo1bar2baz3")))
+(test-equal "foo" (read-delimited char-set:digit
+                                  (open-input-string "foo1bar2baz3")))
+(test-end "read-delimited")
 
 
 (test-end "scsh")

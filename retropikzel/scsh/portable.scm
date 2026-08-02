@@ -1,4 +1,4 @@
-(define (reduce-port port reader op . seeds)
+(define (port-fold port reader op . seeds)
   (letrec* ((looper (lambda new-seeds
                       (let ((read-value (reader port)))
                         (if (eof-object? read-value)
@@ -8,7 +8,7 @@
                                             looper))))))
     (apply looper seeds)))
 
-(define port-fold reduce-port)
+(define reduce-port port-fold)
 
 (define (simplify-file-name fname) ;; TODO
   (cond
@@ -301,11 +301,12 @@
     (error "file-name-directory error: fname must be string" fname))
   (cond ((string=? fname "/") "")
         ((string=? fname "") "")
+        ((char=? (string-ref fname (- (string-length fname) 1)) #\/) fname)
         (else
           (let ((chibi-path (path-directory fname)))
             (if (string=? chibi-path ".")
               ""
-              chibi-path)))))
+              (string-append chibi-path "/"))))))
 
 (define (file-name-directory? fname)
   (when (not (string? fname))
@@ -325,6 +326,12 @@
   (when (not (string? fname))
     (error "file-name-non-directory? error: fname must be string" fname))
   (if (string=? fname "") #t (not (file-name-directory? fname))))
+
+(define (file-name-nondirectory fname)
+  (when (not (string? fname))
+    (error "file-name-nondirectory error: fname must be string" fname))
+  (cond ((string=? fname "/") "/")
+        (else (path-strip-directory fname))))
 
 (define (file-name-sans-extension fname)
   (when (not (string? fname))
@@ -393,4 +400,65 @@
     (linux 'linux)
     (freebsd 'freesdb)
     (netbsd 'netbsd)
+    (haiku 'haiku)
     (else 'unix)))
+
+(define (parse-file-name fname)
+  (when (not (string? fname))
+    (error "parse-file-name error: fname must be string" fname))
+  (let ((f (file-name-nondirectory fname)))
+    (list (file-name-directory fname)
+          (file-name-sans-extension f)
+          (file-name-extension f))))
+
+(define (path-list->file-name path-list . args)
+  (let ((path (string-join path-list "/")))
+  (cond ((null? path-list) "")
+        ((and (not (null? args))
+              (string=? (list-ref args 0) ""))
+         (string-append "/" path))
+        ((and (not (null? args))
+              (not (string? (list-ref args 0))))
+         (error "path-list->file-name error: dir must be string"
+                (list-ref args 0)))
+        ((and (not (null? args))
+              (string? (list-ref args 0)))
+         (string-append (file-name-as-directory (list-ref args 0)) path))
+        (else path))))
+
+(define (port->list reader port)
+  (reverse (port-fold port reader cons '())))
+
+(define (port->sexp-list port) (port->list read port))
+
+(define (port->string port)
+  (letrec* ((result "")
+            (looper (lambda (str)
+                      (cond ((eof-object? str) result)
+                            (else (set! result (string-append result str))
+                                  (looper (read-string 1024 port)))))))
+    (looper (read-string 1024 port))))
+
+(define (port->string-list port) (reverse (port-fold port read-line cons '())))
+
+(define (read-delimited char-set . args)
+  (when (and (not (string? char-set))
+             (not (char-set? char-set)))
+    (error (string-append "read-delimited error: read-delimited char-set must"
+                          " be either string or char-set")))
+  (letrec* ((character-set (if (string? char-set)
+                             (string->char-set char-set)
+                             char-set))
+            (port (if (>= (length args) 1)
+                    (car args)
+                    (current-input-port)))
+            (result '())
+            (looper (lambda (c)
+                      (cond ((char-set-contains? character-set c)
+                             (list->string (reverse result)))
+                            (else (set! result (cons c result))
+                                  (looper (read-char port)))))))
+    (looper (read-char port))))
+
+
+
