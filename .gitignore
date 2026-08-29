@@ -29,3 +29,4 @@ tmp
 test-program
 *.test
 *.test1
+!.snow-repo.scm

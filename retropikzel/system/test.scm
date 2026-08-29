@@ -1,3 +1,11 @@
+(import (scheme base)
+        (scheme write)
+        (scheme file)
+        (retropikzel system)
+        (retropikzel tap)
+        (srfi 64))
+
+(test-runner-current (tap-runner))
 
 (test-begin "foreign-c-system")
 

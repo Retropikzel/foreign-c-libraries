@@ -523,4 +523,14 @@
 (test-end "read-line")
 
 
+#| IN PROGRESS
+(test-begin "read-paragraph")
+(test-equal "foo" (read-line (open-input-string "foo\n\nbar\n\nbaz\n\n")))
+(test-equal "foo" (read-line (open-input-string "foo\n\nbar\n\nbaz\n\n")))
+(test-equal "foo" (read-line (open-input-string "foo\n\nbar\n\nbaz\n\n") 'trim))
+(test-equal "foo\n" (read-line (open-input-string "foo\n\nbar\n\nbaz\n\n") 'concat))
+(test-end "read-paragraph")
+|#
+
+
 (test-end "scsh")

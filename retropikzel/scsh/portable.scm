@@ -495,7 +495,8 @@
 
     (apply read-delimited (cons (string #\newline) args))))
 
-#| TODO
+;; IN PROGRESS
+#|
 (define read-paragraph
   (lambda args
 
@@ -518,6 +519,13 @@
                  (cond ((and (eof-object? line) (null? result)) line)
                        ((and (not skipped-blank-lines?) (string=? line ""))
                         (looper (read-line port handle-delim)))
+                       ((and (not (string=? line ""))
+                             (equal handle-delim 'trim))
+                        (set! result line result))
+                       ((and (not (string=? line ""))
+                             (equal handle-delim 'concat))
+                        (set! result (string-append line "\n") result))
+
 
 
     ))
